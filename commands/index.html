@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comandos · FireDex</title><meta name="description" content="FireDex: editor de código, modelador 3D y animaciones para addons de Minecraft Bedrock, todo en tu navegador."><meta name="theme-color" content="#14151c">
+<link rel="icon" type="image/png" href="/img/logo-64.png"><link rel="apple-touch-icon" href="/img/logo-192.png">
+<link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="/css/pixel.css"></head>
+<body class="px-page"><canvas id="particles"></canvas>
+<header class="px-top"><div class="px-wrap"><a href="/"><img src="/img/logo.png" alt="FireDex"></a><b class="px" style="font-size:26px">FireDex</b><span class="sp"></span>
+<a class="px-btn sm" href="/commands/">Comandos</a><a class="px-btn sm green" href="/guide/">Guía</a></div></header>
+<main class="px-wrap">
+<p class="px-crumbs"><a href="/">Inicio</a> › Comandos</p><h1 class="px" style="font-size:44px;margin:0">Comandos de Bedrock</h1>
+<input class="px-input" id="q" placeholder="Buscar: give, fill, execute…" style="margin:14px 4px;width:calc(100% - 8px)">
+<div class="chips" id="chips"></div>
+<div class="px-card"><h3>Constructor rápido</h3>
+<select id="bType"><option>give</option><option>summon</option></select>
+<input id="bTarget" value="@s" placeholder="Objetivo"><input id="bId" list="dl" value="diamond_sword" placeholder="ID"><input id="bN" type="number" min="1" value="1">
+<datalist id="dl"></datalist><code class="cmd" id="bOut"></code><button class="px-btn green sm" id="bCopy">Copiar</button></div>
+<div id="list"></div><p id="empty" style="display:none;text-align:center">Sin resultados.</p></main>
+<footer class="px-foot"><div class="px-wrap"><div class="px-foot-in"><span>© 2026 FireDex · Herramienta independiente, no afiliada a Mojang ni a Microsoft.</span><nav><a href="/terms/">Términos</a><a href="/privacy/">Privacidad</a><a href="/cookies/">Cookies</a><a href="/legal/">Aviso legal</a></nav></div></div></footer>
+<nav class="px-nav"><a href="/" class=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M3 11.5 12 4l9 7.5M5.5 10v9h13v-9"/></svg>Inicio</a><a href="/commands/" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M4 5h16v14H4zM7 9l3 3-3 3M12 15h5"/></svg>Comandos</a><a class="plus" href="/#crear" title="Crear proyecto">+</a><a href="/manifest/" class=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M6 3h9l4 4v14H6zM9 12h7M9 16h7"/></svg>Manifest</a><a href="/guide/" class=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v18H6.5A2.5 2.5 0 0 1 4 18.5zM20 5.5A2.5 2.5 0 0 0 17.5 3H12v18h5.5a2.5 2.5 0 0 0 2.5-2.5z"/></svg>Guía</a></nav>
+<script src="/js/data.js"></script><script>
+const $=s=>document.querySelector(s);let cat='Todos';
+const cats=['Todos',...new Set(COMMANDS.map(c=>c.c))];
+const copy=(t,b)=>navigator.clipboard.writeText(t).then(()=>{const o=b.textContent;b.textContent='¡Copiado!';setTimeout(()=>b.textContent=o,1000)});
+$('#chips').innerHTML=cats.map(c=>'<span class="chip'+(c==cat?' on':'')+'">'+c+'</span>').join('');
+$('#chips').onclick=e=>{if(!e.target.classList.contains('chip'))return;cat=e.target.textContent;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x==e.target));draw()};
+$('#q').oninput=()=>draw();
+function draw(){const q=$('#q').value.toLowerCase().trim();
+const r=COMMANDS.filter(c=>(cat=='Todos'||c.c==cat)&&(c.n+c.d+c.s).toLowerCase().includes(q));
+$('#empty').style.display=r.length?'none':'block';
+$('#list').innerHTML=r.map((c,i)=>'<div class="px-card"><span class="tag">'+c.c+'</span><h3>/'+c.n+'</h3><p>'+c.d+'</p><code class="cmd">'+c.s.replace(/</g,'&lt;')+'</code><code class="cmd">'+c.e.replace(/</g,'&lt;')+'</code><button class="px-btn sm" data-i="'+COMMANDS.indexOf(c)+'">Copiar ejemplo</button></div>').join('')}
+$('#list').onclick=e=>{const i=e.target.dataset.i;if(i!=null)copy(COMMANDS[i].e,e.target)};
+function build(){const t=$('#bType').value;$('#dl').innerHTML=(t=='give'?ITEMS:MOBS).map(x=>'<option value="'+x+'">').join('');
+$('#bOut').textContent=t=='give'?'/give '+$('#bTarget').value+' '+$('#bId').value+' '+$('#bN').value:'/summon '+$('#bId').value+' ~ ~ ~'}
+['bType','bTarget','bId','bN'].forEach(i=>$('#'+i).oninput=build);$('#bType').onchange=()=>{$('#bId').value=$('#bType').value=='give'?'diamond_sword':'zombie';build()};
+$('#bCopy').onclick=e=>copy($('#bOut').textContent,e.target);build();draw();</script><script src="/js/cookies.js"></script></body></html>

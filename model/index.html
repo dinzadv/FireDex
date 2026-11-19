@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#14151c">
+<link rel="icon" type="image/png" href="/img/logo-64.png"><link rel="apple-touch-icon" href="/img/logo-192.png">
+<title>FireDex · Modelador</title>
+<link rel="stylesheet" href="/css/model.css">
+</head>
+<body>
+<div class="app" id="app" data-mode="edit" data-sheet="">
+
+  <header class="top">
+    <a class="ib" id="backBtn" href="/edit/" title="Volver al editor"><i data-i="back"></i></a>
+    <div class="ttl"><b id="fileName">modelo.geo.json</b><small id="saveState">Listo</small></div>
+    <div class="modes" role="tablist">
+      <button class="mode on" data-mode="edit" role="tab" title="Modelar (1)"><i data-i="cube"></i><span>Modelar</span></button>
+      <button class="mode" data-mode="uv" role="tab" title="Mapeo UV (2)"><i data-i="uv"></i><span>Mapeo</span></button>
+      <button class="mode" data-mode="paint" role="tab" title="Pintar (3)"><i data-i="brush"></i><span>Pintar</span></button>
+      <button class="mode" data-mode="anim" role="tab" title="Animar (4)"><i data-i="film"></i><span>Animar</span></button>
+    </div>
+    <div class="sp"></div>
+    <button class="ib" id="histBtn" title="Historial de cambios"><i data-i="hist"></i></button>
+    <button class="ib" id="undoBtn" title="Deshacer (Ctrl+Z)"><i data-i="undo"></i></button>
+    <button class="ib" id="redoBtn" title="Rehacer (Ctrl+Shift+Z)"><i data-i="redo"></i></button>
+    <button class="ib save" id="saveBtn" title="Guardar (Ctrl+S)"><i data-i="save"></i></button>
+    <button class="ib" id="intBtn" title="Integración con el addon"><i data-i="link"></i></button>
+    <button class="ib" id="menuBtn" title="Más"><i data-i="more"></i></button>
+    <div class="menu" id="menu" hidden>
+      <button data-act="newgeo">Nuevo modelo vacío</button>
+      <button data-act="import">Importar .geo.json…</button>
+      <button data-act="export">Descargar .geo.json</button>
+      <hr>
+      <button data-act="loadtex">Cargar textura desde archivo…</button>
+      <button data-act="savetex">Guardar textura en el proyecto</button>
+      <button data-act="dltex">Descargar textura .png</button>
+      <button data-act="newtex">Nueva textura en blanco</button>
+      <hr>
+      <button data-act="wire">Ver/ocultar malla</button>
+      <button data-act="grid">Ver/ocultar cuadrícula</button>
+      <button data-act="shade">Sombreado sí/no</button>
+      <button data-act="cmode">Vista: textura / color</button>
+      <button data-act="reset">Restablecer cámara</button>
+      <hr>
+      <a class="mi" href="/guide/#modelador" target="_blank">Guía del modelador</a>
+    </div>
+  </header>
+
+  <nav class="tools" id="tools">
+    <div class="tgroup" data-for="edit">
+      <button class="tool on" data-tool="select" title="Seleccionar (V)"><i data-i="cursor"></i><small>Elegir</small></button>
+      <button class="tool" data-tool="move" title="Mover (G)"><i data-i="move"></i><small>Mover</small></button>
+      <button class="tool" data-tool="rotate" title="Rotar (R)"><i data-i="rotate"></i><small>Rotar</small></button>
+      <button class="tool" data-tool="scale" title="Tamaño (S)"><i data-i="scale"></i><small>Tamaño</small></button>
+      <span class="tsep"></span>
+      <button class="tool act" id="addCube" title="Añadir cubo"><i data-i="plus"></i><small>Cubo</small></button>
+      <button class="tool act" id="addBone" title="Añadir hueso"><i data-i="bone"></i><small>Hueso</small></button>
+      <button class="tool act" id="dupBtn" title="Duplicar (Ctrl+D)"><i data-i="copy"></i><small>Duplicar</small></button>
+      <button class="tool act danger" id="delBtn" title="Eliminar (Supr)"><i data-i="trash"></i><small>Borrar</small></button>
+      <span class="tsep"></span>
+      <button class="tool act" id="moreToolsBtn" title="Más herramientas"><i data-i="wand"></i><small>Más</small></button>
+    </div>
+    <div class="tgroup" data-for="uv">
+      <button class="tool act" id="uvAutoAll" title="Reorganizar todos los UV"><i data-i="wand"></i><small>Auto UV</small></button>
+      <button class="tool act" id="uvSnapBtn" title="Ajustar al píxel entero"><i data-i="ruler"></i><small>Píxel</small></button>
+      <button class="tool act" id="uvFacesBtn" title="Pasar a UV por caras"><i data-i="uv"></i><small>Caras</small></button>
+    </div>
+    <div class="tgroup" data-for="paint">
+      <button class="tool on" data-ptool="pencil" title="Lápiz (B)"><i data-i="pencil"></i><small>Lápiz</small></button>
+      <button class="tool" data-ptool="eraser" title="Borrador (E)"><i data-i="eraser"></i><small>Borrar</small></button>
+      <button class="tool" data-ptool="bucket" title="Relleno (F)"><i data-i="bucket"></i><small>Relleno</small></button>
+      <button class="tool" data-ptool="picker" title="Cuentagotas (I)"><i data-i="picker"></i><small>Gotero</small></button>
+    </div>
+    <div class="tgroup" data-for="anim">
+      <button class="tool on" data-tool="select" title="Seleccionar (V)"><i data-i="cursor"></i><small>Elegir</small></button>
+      <button class="tool" data-tool="move" title="Mover hueso (G)"><i data-i="move"></i><small>Mover</small></button>
+      <button class="tool" data-tool="rotate" title="Rotar hueso (R)"><i data-i="rotate"></i><small>Rotar</small></button>
+      <button class="tool" data-tool="scale" title="Escalar hueso (S)"><i data-i="scale"></i><small>Escala</small></button>
+      <span class="tsep"></span>
+      <button class="tool act" id="keyAdd" title="Añadir clave en el tiempo actual (K)"><i data-i="key"></i><small>Clave</small></button>
+      <button class="tool act" id="keyReset" title="Quitar pose del hueso en este tiempo"><i data-i="eraser"></i><small>Reset</small></button>
+    </div>
+  </nav>
+  <div class="pop" id="morePop" hidden></div>
+
+  <main class="view" id="view">
+    <canvas id="gl"></canvas>
+    <canvas id="ov"></canvas>
+    <div class="vhud">
+      <button class="chip" id="snapBtn" title="Ajuste de cuadrícula">Ajuste 1</button>
+      <button class="chip" id="viewBtn" title="Cambiar vista">Perspectiva</button>
+    </div>
+    <div class="vhelp" id="vhelp"></div>
+    <div class="nogl" id="noGl" hidden>
+      <b>Tu navegador no pudo iniciar WebGL</b>
+      <span>Activa la aceleración por hardware o prueba otro navegador.</span>
+    </div>
+  </main>
+
+  <section class="tl" id="tl">
+    <div class="tl-bar">
+      <select id="animSel" title="Animación"></select>
+      <button class="ib sm" id="animNew" title="Nueva animación"><i data-i="plus"></i></button>
+      <button class="ib sm" id="animDel" title="Eliminar animación"><i data-i="trash"></i></button>
+      <span class="tsep v"></span>
+      <button class="ib" id="tPlay" title="Reproducir (Espacio)"><i data-i="play"></i></button>
+      <button class="ib" id="tStop" title="Detener"><i data-i="stop"></i></button>
+      <label class="tnum" title="Tiempo actual (s)"><input type="number" id="tTime" step="0.05" min="0" value="0"><small>s</small></label>
+      <label class="tnum" title="Duración (s)"><small>dur</small><input type="number" id="tLen" step="0.1" min="0.05" value="1"></label>
+      <select id="tLoop" title="Repetición"><option value="true">Bucle</option><option value="false">Una vez</option><option value="hold_on_last_frame">Mantener final</option></select>
+      <span class="grow"></span>
+      <span class="tfile" id="tFile"></span>
+    </div>
+    <div class="tl-body">
+      <div class="tl-names" id="tlNames"></div>
+      <div class="tl-track" id="tlTrack"><canvas id="tlCv"></canvas></div>
+    </div>
+  </section>
+  <aside class="side" id="side">
+    <section class="panel" id="pOutliner" data-p="outliner">
+      <div class="phead"><b>Esquema</b><span class="grow"></span><span class="count" id="outCount"></span></div>
+      <div class="pbody" id="outliner"></div>
+    </section>
+    <section class="panel" id="pProps" data-p="props">
+      <div class="phead"><b id="propsTitle">Propiedades</b></div>
+      <div class="pbody" id="props"></div>
+    </section>
+    <section class="panel" id="pPaint" data-p="paint">
+      <div class="phead"><b id="pPaintTitle">Pintura</b></div>
+      <div class="pbody">
+        <div class="pr">
+          <input type="color" id="colorIn" value="#7c6cf5">
+          <div class="swatches" id="swatches"></div>
+        </div>
+        <div class="pr">
+          <label class="lab">Pincel <b id="brushVal">1</b> px</label>
+          <input type="range" id="brushIn" min="1" max="12" value="1">
+        </div>
+        <div class="pr">
+          <label class="lab">Textura</label>
+          <select id="texSel"></select>
+        </div>
+        <div class="pr uvbar">
+          <label class="lab">Mapa UV</label>
+          <span class="grow"></span>
+          <button class="ib sm" id="uvOut" title="Alejar"><i data-i="minus"></i></button>
+          <button class="ib sm" id="uvIn" title="Acercar"><i data-i="plus"></i></button>
+        </div>
+        <div class="uvwrap" id="uvWrap"><canvas id="uvCv"></canvas></div>
+      </div>
+    </section>
+  </aside>
+
+  <nav class="bnav" id="bnav">
+    <button data-sheet="outliner"><i data-i="layers"></i><span>Esquema</span></button>
+    <button data-sheet="props"><i data-i="sliders"></i><span>Datos</span></button>
+    <button data-sheet="paint"><i data-i="brush"></i><span>Pintura</span></button>
+    <button data-sheet="anim" id="bnAnim"><i data-i="film"></i><span>Línea</span></button>
+  </nav>
+
+  <div class="status" id="status"></div>
+  <div class="toast" id="toast" hidden></div>
+</div>
+
+<input type="file" id="fileIn" accept=".json,.geo.json,application/json" hidden>
+<input type="file" id="texIn" accept="image/png,image/*" hidden>
+<script src="/js/vendor/jszip.min.js"></script>
+<script src="/js/model.js"></script>
+<script src="/js/model-anim.js"></script>
+<script src="/js/model-int.js"></script>
+<script src="/js/cookies.js"></script>
+</body>
+</html>
