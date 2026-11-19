@@ -20,7 +20,7 @@ ${extra}<script src="/js/cookies.js"></script></body></html>`;
 const path = require('path');
 const out = (f, h) => { fs.mkdirSync(path.dirname(f) === '.' ? '.' : path.dirname(f), { recursive: true }); fs.writeFileSync(f, h); };
 // ---- configuración legal: edita estos datos ----
-const LEGAL = { name: 'FireDex', email: '', jurisdiction: '', updated: '18 de noviembre de 2026' };
+const LEGAL = { name: 'FireDex', email: 'mcforgemx@gmail.com', jurisdiction: '', updated: '18 de noviembre de 2026' };
 const FOOT = `<footer class="px-foot"><div class="px-wrap"><div class="px-foot-in"><span>© ${new Date().getFullYear()} ${LEGAL.name} · Herramienta independiente, no afiliada a Mojang ni a Microsoft.</span><nav><a href="/terms/">Términos</a><a href="/privacy/">Privacidad</a><a href="/cookies/">Cookies</a><a href="/legal/">Aviso legal</a></nav></div></div></footer>`;
 
 // ---------- index ----------
@@ -51,6 +51,7 @@ out('index.html', shell('/', 'Inicio', `
   <button class="hm-tool" id="guideCard">${TI('<circle cx="12" cy="12" r="9"/><path d="M12 8v.01M12 11v5"/>')}<div><h3>Guía rápida</h3><p>Primeros pasos para trabajar con tus addons.</p></div></button>
  </div>
  <button class="hm-version" id="versionCard">Versión y formatos compatibles ›</button>
+ <div class="hm-legal"><b>Información legal</b><nav><a href="/terms/">Términos y condiciones</a><a href="/privacy/">Privacidad</a><a href="/cookies/">Cookies</a><a href="/legal/">Aviso legal</a></nav><small>Contacto: <a href="mailto:${LEGAL.email}">${LEGAL.email}</a></small></div>
 </section>
 <input type="file" id="addonInput" accept=".mcaddon,.mcpack,.zip" style="display:none"><input type="file" id="coverInput" accept="image/*" style="display:none">`,
  `<script src="/js/vendor/jszip.min.js"></script><script src="/js/main.js"></script>`));

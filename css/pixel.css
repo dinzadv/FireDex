@@ -73,3 +73,5 @@ body:not(.px-page){font-family:'Nunito',system-ui,sans-serif}
 .lg-meta{color:var(--dim);margin:6px 4px 10px}.lg-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 4px 4px}.lg-tabs a{background:var(--card);padding:6px 12px;color:var(--ink);font-weight:800;font-size:14px}.lg-tabs a:hover{outline:3px solid var(--blue)}
 .lg-scroll{overflow-x:auto;margin-bottom:10px}.lg code{background:#0d0e15;padding:1px 6px;font-size:.88em}
 .lg-cookie{display:flex;gap:16px;align-items:flex-start}.lg-ck{width:64px;height:64px;flex:none}
+
+.hm-legal{margin:22px 4px 0;padding:16px;background:var(--card);display:flex;flex-direction:column;gap:8px}.hm-legal b{font:20px 'Lilita One',system-ui,sans-serif}.hm-legal nav{display:flex;flex-wrap:wrap;gap:8px 18px}.hm-legal a{color:var(--blue);text-decoration:underline}.hm-legal small{color:var(--dim)}
