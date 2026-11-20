@@ -87,13 +87,17 @@ $('#bCopy').onclick=e=>copy($('#bOut').textContent,e.target);build();draw();</sc
 out('manifest/index.html', shell('/manifest/', 'Manifest', `
 <p class="px-crumbs"><a href="/">Inicio</a> › Manifest</p><h1 class="px" style="font-size:44px;margin:0">Generador de manifest</h1>
 <div class="px-card"><input id="n" value="Mi Addon" placeholder="Nombre"><input id="d" value="Creado con FireDex" placeholder="Descripción">
-<input id="v" value="1.21.0" placeholder="min_engine_version (ej. 1.21.0)">
+<input id="v" value="1.21.50" placeholder="min_engine_version (ej. 1.21.50)">
 <select id="t"><option value="bp">Behavior pack (data)</option><option value="rp">Resource pack (resources)</option></select>
+<label><input type="checkbox" id="sc" checked> Incluir módulo de scripts (solo Behavior pack)</label>
+<select id="sv"><option>2.11.0</option><option>2.0.0</option><option>1.18.0</option></select> <select id="ui"><option value="">Sin server-ui</option><option value="2.3.0">+ @minecraft/server-ui 2.3.0</option></select>
 <button class="px-btn green" id="g">Generar</button></div>
+<p style="opacity:.7;font-size:13px">Referencia (nov-2026): Bedrock estable 26.63 · @minecraft/server 2.11.0 · @minecraft/server-ui 2.3.0 (requiere server 2.x). <code>min_engine_version</code> con numeración 26.x no está verificado; 1.21.50 funciona en clientes nuevos.</p>
 <div class="px-card"><h3 id="fn">manifest.json</h3><code class="cmd" id="o" style="max-height:420px"></code><button class="px-btn" id="c">Copiar</button> <button class="px-btn yellow" id="s">Descargar</button></div>`,
 `<script>const $=s=>document.querySelector(s),u=()=>crypto.randomUUID();
 function gen(){const bp=$('#t').value=='bp',v=$('#v').value.split('.').map(Number);
-const m={format_version:2,header:{name:$('#n').value,description:$('#d').value,uuid:u(),version:[1,0,0],min_engine_version:v.length==3?v:[1,21,0]},modules:[{type:bp?'data':'resources',uuid:u(),version:[1,0,0]}]};
+const m={format_version:2,header:{name:$('#n').value,description:$('#d').value,uuid:u(),version:[1,0,0],min_engine_version:v.length==3?v:[1,21,50]},modules:[{type:bp?'data':'resources',uuid:u(),version:[1,0,0]}]};
+if(bp&&$('#sc').checked){m.modules.push({type:'script',language:'javascript',uuid:u(),entry:'scripts/main.js',version:[1,0,0]});m.dependencies=[{module_name:'@minecraft/server',version:$('#sv').value}];if($('#ui').value)m.dependencies.push({module_name:'@minecraft/server-ui',version:$('#ui').value})}
 $('#o').textContent=JSON.stringify(m,null,2);$('#fn').textContent=(bp?'behavior_pack':'resource_pack')+'/manifest.json'}
 $('#g').onclick=gen;gen();
 $('#c').onclick=e=>navigator.clipboard.writeText($('#o').textContent).then(()=>{e.target.textContent='¡Copiado!'});
