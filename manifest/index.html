@@ -2,7 +2,7 @@
 <html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Manifest · FireDex</title><meta name="description" content="FireDex: editor de código, modelador 3D y animaciones para addons de Minecraft Bedrock, todo en tu navegador."><meta name="theme-color" content="#14151c">
 <link rel="icon" type="image/png" href="/img/logo-64.png"><link rel="apple-touch-icon" href="/img/logo-192.png">
-<link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="/css/pixel.css"></head>
+<link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="/css/pixel.css"><script src="/js/i18n.js"></script></head>
 <body class="px-page"><canvas id="particles"></canvas>
 <header class="px-top"><div class="px-wrap"><a href="/"><img src="/img/logo.png" alt="FireDex"></a><b class="px" style="font-size:26px">FireDex</b><span class="sp"></span>
 <a class="px-btn sm" href="/commands/">Comandos</a><a class="px-btn sm green" href="/guide/">Guía</a></div></header>
@@ -15,7 +15,8 @@
 <select id="sv"><option>2.11.0</option><option>2.0.0</option><option>1.18.0</option></select> <select id="ui"><option value="">Sin server-ui</option><option value="2.3.0">+ @minecraft/server-ui 2.3.0</option></select>
 <button class="px-btn green" id="g">Generar</button></div>
 <p style="opacity:.7;font-size:13px">Referencia (nov-2026): Bedrock estable 26.63 · @minecraft/server 2.11.0 · @minecraft/server-ui 2.3.0 (requiere server 2.x). <code>min_engine_version</code> con numeración 26.x no está verificado; 1.21.50 funciona en clientes nuevos.</p>
-<div class="px-card"><h3 id="fn">manifest.json</h3><code class="cmd" id="o" style="max-height:420px"></code><button class="px-btn" id="c">Copiar</button> <button class="px-btn yellow" id="s">Descargar</button></div></main>
+<div class="px-card"><h3 id="fn">manifest.json</h3><code class="cmd" id="o" style="max-height:420px"></code><button class="px-btn" id="c">Copiar</button> <button class="px-btn yellow" id="s">Descargar</button></div>
+<section id="upd" style="margin-top:34px"></section></main>
 <footer class="px-foot"><div class="px-wrap"><div class="px-foot-in"><span>© 2026 FireDex · Herramienta independiente, no afiliada a Mojang ni a Microsoft.</span><nav><a href="/terms/">Términos</a><a href="/privacy/">Privacidad</a><a href="/cookies/">Cookies</a><a href="/legal/">Aviso legal</a></nav></div></div></footer>
 <nav class="px-nav"><a href="/" class=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M3 11.5 12 4l9 7.5M5.5 10v9h13v-9"/></svg>Inicio</a><a href="/commands/" class=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M4 5h16v14H4zM7 9l3 3-3 3M12 15h5"/></svg>Comandos</a><a class="plus" href="/#crear" title="Crear proyecto">+</a><a href="/manifest/" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M6 3h9l4 4v14H6zM9 12h7M9 16h7"/></svg>Manifest</a><a href="/guide/" class=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v18H6.5A2.5 2.5 0 0 1 4 18.5zM20 5.5A2.5 2.5 0 0 0 17.5 3H12v18h5.5a2.5 2.5 0 0 0 2.5-2.5z"/></svg>Guía</a></nav>
 <script>const $=s=>document.querySelector(s),u=()=>crypto.randomUUID();
@@ -25,4 +26,4 @@ if(bp&&$('#sc').checked){m.modules.push({type:'script',language:'javascript',uui
 $('#o').textContent=JSON.stringify(m,null,2);$('#fn').textContent=(bp?'behavior_pack':'resource_pack')+'/manifest.json'}
 $('#g').onclick=gen;gen();
 $('#c').onclick=e=>navigator.clipboard.writeText($('#o').textContent).then(()=>{e.target.textContent='¡Copiado!'});
-$('#s').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('#o').textContent],{type:'application/json'}));a.download='manifest.json';a.click()};</script><script src="/js/cookies.js"></script></body></html>
+$('#s').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('#o').textContent],{type:'application/json'}));a.download='manifest.json';a.click()};</script><script src="/js/versions.js"></script><script src="/js/manifest-update.js"></script><script src="/js/cookies.js"></script></body></html>

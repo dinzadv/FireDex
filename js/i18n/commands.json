@@ -1,0 +1,182 @@
+[
+[
+"Bedrock commands",
+"Comandos de Bedrock"
+],
+[
+"Search: give, fill, execute…",
+"Buscar: give, fill, execute…"
+],
+[
+"<span class=\"chip on\">All</span><span class=\"chip\">Player</span><span class=\"chip\">World</span><span class=\"chip\">Entities</span><span class=\"chip\">Logic</span><span class=\"chip\">Messages</span><span class=\"chip\">Camera</span>",
+"<span class=\"chip on\">Todos</span><span class=\"chip\">Jugador</span><span class=\"chip\">Mundo</span><span class=\"chip\">Entidades</span><span class=\"chip\">Lógica</span><span class=\"chip\">Mensajes</span><span class=\"chip\">Cámara</span>"
+],
+[
+"All",
+"Todos"
+],
+[
+"Player",
+"Jugador"
+],
+[
+"World",
+"Mundo"
+],
+[
+"Entities",
+"Entidades"
+],
+[
+"Logic",
+"Lógica"
+],
+[
+"Messages",
+"Mensajes"
+],
+[
+"Camera",
+"Cámara"
+],
+[
+"Quick builder",
+"Constructor rápido"
+],
+[
+"Target",
+"Objetivo"
+],
+[
+"Copy example",
+"Copiar ejemplo"
+],
+[
+"No results.",
+"Sin resultados."
+],
+[
+"Gives an item to the player.",
+"Da un objeto al jugador."
+],
+[
+"Changes game mode: survival, creative, adventure, spectator.",
+"Cambia el modo: survival, creative, adventure, spectator."
+],
+[
+"Applies an effect. Use \"clear\" to remove them.",
+"Aplica un efecto. Usa \"clear\" para quitarlos."
+],
+[
+"Enchants the item in hand.",
+"Encanta el objeto en la mano."
+],
+[
+"Gives levels (L) or experience points.",
+"Da niveles (L) o puntos de experiencia."
+],
+[
+"Removes items from the inventory.",
+"Borra objetos del inventario."
+],
+[
+"Teleports. ~ is relative, ^ is local.",
+"Teletransporta. ~ es relativo, ^ es local."
+],
+[
+"Places a block. Mode: replace, destroy, keep.",
+"Coloca un bloque. Modo: replace, destroy, keep."
+],
+[
+"Fills an area (max. 32768 blocks). Modes: replace, hollow, outline, keep, destroy.",
+"Rellena un área (máx. 32768 bloques). Modos: replace, hollow, outline, keep, destroy."
+],
+[
+"Copies a region of blocks.",
+"Copia una región de bloques."
+],
+[
+"Saves/loads world structures (like structure blocks).",
+"Guarda/carga estructuras del mundo (como en bloques de estructura)."
+],
+[
+"Changes the time of day.",
+"Cambia la hora del día."
+],
+[
+"Changes the weather.",
+"Cambia el clima."
+],
+[
+"Sets the world spawn point.",
+"Define el punto de aparición del mundo."
+],
+[
+"Rules: keepInventory, doDaylightCycle, mobGriefing, commandBlockOutput, showCoordinates…",
+"Reglas: keepInventory, doDaylightCycle, mobGriefing, commandBlockOutput, showCoordinates…"
+],
+[
+"Summons an entity, optionally with an event.",
+"Invoca una entidad, opcionalmente con un evento."
+],
+[
+"Removes entities.",
+"Elimina entidades."
+],
+[
+"Triggers an event defined in the behavior pack.",
+"Dispara un evento definido en el behavior pack."
+],
+[
+"Manages tags, useful in @e[tag=…] selectors.",
+"Gestiona etiquetas, útiles en selectores @e[tag=…]."
+],
+[
+"Plays an animation from the resource pack.",
+"Reproduce una animación del resource pack."
+],
+[
+"Runs a command in another context (new syntax since 1.19.50).",
+"Ejecuta un comando con otro contexto (1.19.50+ sintaxis nueva)."
+],
+[
+"Runs a .mcfunction from behavior_pack/functions.",
+"Ejecuta un .mcfunction de behavior_pack/functions."
+],
+[
+"Creates objectives and manages scores.",
+"Crea objetivos y gestiona puntuaciones."
+],
+[
+"Checks whether the target exists (command blocks).",
+"Comprueba si existe el objetivo (bloques de comandos)."
+],
+[
+"Sends an event to your Script API code (@minecraft/server).",
+"Envía un evento a tus Script API (@minecraft/server)."
+],
+[
+"Message with JSON formatting. § applies colors.",
+"Mensaje con formato JSON. § aplica colores."
+],
+[
+"Shows titles on screen.",
+"Muestra títulos en pantalla."
+],
+[
+"Message to chat.",
+"Mensaje al chat."
+],
+[
+"Spawns particles.",
+"Genera partículas."
+],
+[
+"Plays a sound from sounds.json.",
+"Reproduce un sonido de sounds.json."
+],
+[
+"Controls the camera (cutscenes).",
+"Controla la cámara (cinemáticas)."
+]
+]

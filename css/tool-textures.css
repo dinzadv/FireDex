@@ -1,0 +1,43 @@
+/* Texture editor + vanilla picker */
+.fdt-modal{width:min(1120px,96vw)!important;max-width:96vw;padding:16px!important}
+.fdt-top{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
+.fdt-top .sp{flex:1}
+.fdt-b{display:inline-flex;align-items:center;gap:6px;background:var(--panel3);color:var(--text);border:1px solid var(--border-soft);border-radius:8px;padding:7px 10px;font:600 12px inherit;font-family:inherit;cursor:pointer}
+.fdt-b:hover{border-color:var(--accent)}.fdt-b.on{background:var(--accent-soft);border-color:var(--accent)}.fdt-b:disabled{opacity:.4;cursor:default}
+.fdt-b svg{width:16px;height:16px}
+.fdt-main{display:grid;grid-template-columns:52px minmax(0,1fr) 230px;gap:10px;min-height:0}
+.fdt-tools{display:flex;flex-direction:column;gap:5px}
+.fdt-tools .fdt-b{justify-content:center;padding:9px 0}
+.fdt-stage{height:min(52vh,470px);overflow:auto;border:2px solid #000;border-radius:6px;background:#0c0c0f;display:flex;touch-action:none}
+.fdt-stage canvas{margin:auto;image-rendering:pixelated;touch-action:none;cursor:crosshair;flex:none}
+.fdt-side{display:flex;flex-direction:column;gap:10px;max-height:min(52vh,470px);overflow-y:auto;padding-right:2px}
+.fdt-box{background:var(--panel2);border:1px solid var(--border-soft);border-radius:8px;padding:9px}
+.fdt-box h5{margin:0 0 7px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim2)}
+.fdt-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;font-size:12px;color:var(--text-dim)}
+.fdt-row input[type=text],.fdt-row input[type=number],.fdt-row select{background:var(--panel3);border:1px solid var(--border-soft);border-radius:6px;color:var(--text);padding:5px 7px;font:12px inherit;font-family:inherit;min-width:0;flex:1}
+.fdt-row input[type=range]{flex:1;min-width:60px}.fdt-row input[type=color]{width:34px;height:28px;padding:0;border:1px solid var(--border-soft);background:none;border-radius:6px}
+.fdt-pal{display:grid;grid-template-columns:repeat(8,1fr);gap:3px}
+.fdt-pal i{aspect-ratio:1;border:1px solid #000;cursor:pointer;display:block}.fdt-pal i:hover{outline:2px solid #fff}
+.fdt-prev{display:flex;gap:8px;flex-wrap:wrap}.fdt-prev canvas{image-rendering:pixelated;background:#0c0c0f;border:1px solid #000;border-radius:4px;max-width:100%}
+.fdt-save{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:10px;align-items:end;margin-top:10px;background:var(--panel2);border:1px solid var(--border-soft);border-radius:8px;padding:10px}
+.fdt-save label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-dim)}
+.fdt-save input[type=text]{background:var(--panel3);border:1px solid var(--border-soft);border-radius:6px;color:var(--text);padding:7px;font:12px inherit;font-family:inherit}
+.fdt-seg{display:flex;gap:4px}.fdt-seg .fdt-b{font-size:11.5px}
+.fdt-hint{font-size:11px;color:var(--text-dim2);margin:6px 0 0;line-height:1.5}
+.fdt-hint.warn{color:#e0b341}
+@media (max-width:820px){
+ .fdt-main{grid-template-columns:minmax(0,1fr)}
+ .fdt-tools{flex-direction:row;overflow-x:auto;order:2;padding-bottom:2px}.fdt-tools .fdt-b{flex:0 0 44px}
+ .fdt-stage{height:46vh;order:1}.fdt-side{order:3;max-height:none}
+ .fdt-save{grid-template-columns:1fr}
+}
+/* Vanilla texture picker (also used by the HUD designer) */
+.fdt-pick{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:12px}
+.fdt-pick-box{background:var(--panel);border:1px solid var(--border);border-radius:14px;width:min(860px,100%);max-height:88vh;display:flex;flex-direction:column;padding:14px;gap:10px}
+.fdt-pick-box h3{margin:0;font-size:15px}
+.fdt-pick-grid{overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:6px;min-height:120px}
+.fdt-pick-it{background:var(--panel2);border:1px solid var(--border-soft);border-radius:8px;padding:6px 4px;cursor:pointer;text-align:center;min-width:0}
+.fdt-pick-it:hover{border-color:var(--accent)}
+.fdt-pick-it span{display:block;height:48px;margin:0 auto 4px;width:48px;image-rendering:pixelated;background:#0c0c0f center/contain no-repeat;border-radius:4px}
+.fdt-pick-it small{display:block;font-size:9.5px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fdt-pick input[type=text]{background:var(--panel3);border:1px solid var(--border-soft);border-radius:8px;padding:9px 11px;color:var(--text);font:13px inherit;font-family:inherit}

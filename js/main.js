@@ -171,8 +171,12 @@ function showRenameModal(arg51) {
   }));
 }
 function showDeleteModal(arg53) {
-  showModal('\n    <div class="modal">\n      <div class="warn-icon">' + ICONS.warn + '</div>\n      <h3>Delete project?</h3>\n      <p>Vas a eliminar <b>"' + arg53.name + '"</b>. This action cannot be undone and you will lose all files.</p>\n      <div class="modal-actions">\n        <button class="btn btn-ghost" id="delCancel">Cancel</button>\n        <button class="btn btn-danger" id="delConfirm">Delete</button>\n      </div>\n    </div>\n  ', ((arg52) => {
-    arg52.querySelector("#delCancel").onclick = closeModal, arg52.querySelector("#delConfirm").onclick = async () => {
+  const nm = String(arg53.name || "").trim(), safe = nm.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  showModal('<div class="modal"><div class="warn-icon">' + ICONS.warn + '</div><h3>Delete project?</h3><p>All files of this project will be deleted. This action cannot be undone.</p><p>Type the project name <b style="color:var(--text);user-select:all">' + safe + '</b> to confirm.</p><input type="text" id="delInput" placeholder="Project name" autocomplete="off"><div class="modal-actions"><button class="btn btn-ghost" id="delCancel">Cancel</button><button class="btn btn-danger" id="delConfirm" disabled>Delete</button></div></div>', ((el) => {
+    const inp = el.querySelector("#delInput"), ok = el.querySelector("#delConfirm");
+    inp.focus(); inp.addEventListener("input", () => { ok.disabled = inp.value.trim() !== nm; });
+    el.querySelector("#delCancel").onclick = closeModal; ok.onclick = async () => {
+      if (inp.value.trim() !== nm) return;
       await removeProject(arg53.id), await renderProjects(), closeModal();
     };
   }));

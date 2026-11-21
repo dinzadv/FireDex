@@ -75,3 +75,4 @@ body:not(.px-page){font-family:'Nunito',system-ui,sans-serif}
 .lg-cookie{display:flex;gap:16px;align-items:flex-start}.lg-ck{width:64px;height:64px;flex:none}
 
 .hm-legal{margin:22px 4px 0;padding:16px;background:var(--card);display:flex;flex-direction:column;gap:8px}.hm-legal b{font:20px 'Lilita One',system-ui,sans-serif}.hm-legal nav{display:flex;flex-wrap:wrap;gap:8px 18px}.hm-legal a{color:var(--blue);text-decoration:underline}.hm-legal small{color:var(--dim)}
+.px-card label input[type=checkbox]{display:inline-block;width:auto;margin:0 6px 0 0;vertical-align:middle}.px-card label{display:inline-flex;align-items:center;gap:4px}

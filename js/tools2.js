@@ -78,9 +78,34 @@ ${field('Nombre del archivo', 'lN', 'mi_loot')}
     });
   }
 
+
+  function openImages() {
+    shell('Add images to the addon', `<p class="ij-lead">Import PNG/JPG/WebP images into any folder of your project (textures, UI, item icons…). Optional resize keeps pixel art crisp.</p>
+<label class="imgjson-upload"><span>Choose images</span><input type="file" id="imF" accept="image/*" multiple hidden></label>
+<div class="imgjson-field"><label>Destination folder (any path, created if missing)</label><input type="text" id="imD" list="imDl" value="${U.esc((U.findPacks().rp ? U.findPacks().rp.folder.name : 'RP') + '/textures/custom')}"><datalist id="imDl">${U.folderPaths().map((p) => `<option value="${U.esc(p)}">`).join('')}</datalist></div>
+<div class="imgjson-field-row"><div class="imgjson-field"><label>Resize to (px, 0 = keep)</label><input type="number" id="imS" value="0" min="0" max="2048"></div>
+<div class="imgjson-field imgjson-field-checkbox"><label><input type="checkbox" id="imP" checked> Pixel art (no smoothing)</label></div></div>
+<div class="ij-files" id="imL"></div><div class="modal-actions"><button class="btn btn-primary" id="imGo" disabled>Add to project</button></div>`, (el) => {
+      let files = [];
+      el.querySelector('#imF').onchange = (e) => { files = Array.from(e.target.files); el.querySelector('#imL').innerHTML = files.map((f) => '<li>' + U.esc(f.name) + '</li>').join(''); el.querySelector('#imGo').disabled = !files.length; };
+      el.querySelector('#imGo').onclick = async () => {
+        const dir = el.querySelector('#imD').value.trim().replace(/^\/+|\/+$/g, ''), S = +el.querySelector('#imS').value || 0, px = el.querySelector('#imP').checked, out = [];
+        for (const f of files) {
+          const img = await new Promise((r, j) => { const i = new Image(); i.onload = () => r(i); i.onerror = j; i.src = URL.createObjectURL(f); }).catch(() => null); if (!img) continue;
+          const sc = S ? Math.min(1, S / Math.max(img.width, img.height)) : 1, c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.width * sc)); c.height = Math.max(1, Math.round(img.height * sc));
+          const g = c.getContext('2d'); g.imageSmoothingEnabled = !px; g.drawImage(img, 0, 0, c.width, c.height);
+          const name = U.slug(f.name) + '.png'; U.writeProjectFile((dir ? dir + '/' : '') + name, c.toDataURL('image/png')); out.push(name);
+        }
+        done(out.length + ' image(s) → ' + (dir || '/'));
+      };
+    });
+  }
+
   const ic = UI_ICONS;
   TOOLBOX_TOOLS.push(
     { id: 'versions', name: 'Versiones y APIs', desc: 'Versiones actuales de Bedrock y de @minecraft/server / server-ui.', icon: ic.manifest, onOpen: openVersions },
+    { id: 'images', name: 'Images', desc: 'Import images into any project folder (textures, UI, icons).', icon: ic.upload, onOpen: openImages },
     { id: 'packicon', name: 'Icono de pack', desc: 'Crea pack_icon.png cuadrado desde cualquier imagen.', icon: ic.imgjson, onOpen: openIcon },
     { id: 'recipe', name: 'Recetas', desc: 'Genera recetas shaped / shapeless en el BP.', icon: ic.snippet, onOpen: openRecipe },
     { id: 'loot', name: 'Loot tables', desc: 'Genera tablas de botín con cantidades y pesos.', icon: ic.models, onOpen: openLoot }

@@ -288,8 +288,8 @@ function confirmDeleteModal(arg115, arg116) {
   }));
 }
 function deleteProjectModal() {
-  const v109 = "Delete My Project";
-  showModal('\n    <div class="modal">\n      <div class="warn-icon">' + ICONS.warn + '</div>\n      <h3>Eliminar proyecto</h3>\n      <p>Se eliminará el proyecto completo con todas sus carpetas y archivos. No se puede deshacer.</p>\n      <p>Escribe <b style="color:var(--text)">' + v109 + '</b> to confirm.</p>\n      <input type="text" id="delProjectInput" placeholder="' + v109 + '">\n      <div class="modal-actions">\n        <button class="btn btn-ghost" id="delProjectCancel">Cancelar</button>\n        <button class="btn btn-danger" id="delProjectConfirm" disabled>Eliminar proyecto</button>\n      </div>\n    </div>\n  ', ((arg117) => {
+  const v109 = String(state.name || "").trim() || "project";
+  showModal('\n    <div class="modal">\n      <div class="warn-icon">' + ICONS.warn + '</div>\n      <h3>Eliminar proyecto</h3>\n      <p>Se eliminará el proyecto completo con todas sus carpetas y archivos. No se puede deshacer.</p>\n      <p>Type the project name <b style="color:var(--text);user-select:all">' + v109.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])) + '</b> to confirm.</p>\n      <input type="text" id="delProjectInput" placeholder="Project name">\n      <div class="modal-actions">\n        <button class="btn btn-ghost" id="delProjectCancel">Cancelar</button>\n        <button class="btn btn-danger" id="delProjectConfirm" disabled>Eliminar proyecto</button>\n      </div>\n    </div>\n  ', ((arg117) => {
     const delProjectInputEl = arg117.querySelector("#delProjectInput"), delProjectConfirmEl = arg117.querySelector("#delProjectConfirm");
     delProjectInputEl.focus(), delProjectInputEl.addEventListener("input", () => {
       delProjectConfirmEl.disabled = delProjectInputEl.value.trim() !== v109;

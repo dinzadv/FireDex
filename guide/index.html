@@ -2,7 +2,7 @@
 <html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Guía · FireDex</title><meta name="description" content="FireDex: editor de código, modelador 3D y animaciones para addons de Minecraft Bedrock, todo en tu navegador."><meta name="theme-color" content="#14151c">
 <link rel="icon" type="image/png" href="/img/logo-64.png"><link rel="apple-touch-icon" href="/img/logo-192.png">
-<link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="/css/pixel.css"></head>
+<link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="/css/pixel.css"><script src="/js/i18n.js"></script></head>
 <body class="px-page"><canvas id="particles"></canvas>
 <header class="px-top"><div class="px-wrap"><a href="/"><img src="/img/logo.png" alt="FireDex"></a><b class="px" style="font-size:26px">FireDex</b><span class="sp"></span>
 <a class="px-btn sm" href="/commands/">Comandos</a><a class="px-btn sm green" href="/guide/">Guía</a></div></header>
@@ -11,7 +11,7 @@
 <h1 class="px" style="font-size:44px;margin:0">Guía de FireDex</h1>
 <p class="gd-lead">Todo lo que necesitas para crear addons, modelos y animaciones de Minecraft Bedrock, y para entender cómo funciona FireDex por dentro.</p>
 <div class="px-card gd-toc"><h3>Contenido</h3><p>
-<a href="#inicio">1. Inicio rápido</a> · <a href="#proyectos">2. Proyectos y datos</a> · <a href="#addon">3. Estructura de un addon</a> · <a href="#editor">4. Editor de código</a> · <a href="#modelador">5. Modelador 3D</a> · <a href="#animaciones">6. Animaciones</a> · <a href="#integracion">7. Integración con el addon</a> · <a href="#atajos">8. Atajos</a> · <a href="#dev">9. Para desarrolladores</a> · <a href="#problemas">10. Problemas y límites</a></p></div>
+<a href="#inicio">1. Inicio rápido</a> · <a href="#proyectos">2. Proyectos y datos</a> · <a href="#addon">3. Estructura de un addon</a> · <a href="#editor">4. Editor de código</a> · <a href="#modelador">5. Modelador 3D</a> · <a href="#animaciones">6. Animaciones</a> · <a href="#integracion">7. Integración con el addon</a> · <a href="#atajos">8. Atajos</a> · <a href="#dev">9. Para desarrolladores</a> · <a href="#problemas">10. Problemas y límites</a> · <a href="#tools">11. Herramientas</a></p></div>
 
 <div class="px-card gd" id="inicio"><h3>1. Inicio rápido</h3>
 <p><b>Crear un addon:</b> en Inicio pulsa <b>Crear proyecto</b> o sube un .mcaddon/.mcpack/.zip. Se abre el <b>editor de código</b> con el árbol de archivos.</p>
@@ -129,6 +129,16 @@ css/*.css          pixel.css (menú), editor.css, model.css</code>
 
 <div class="px-card gd" id="problemas"><h3>10. Problemas y límites</h3>
 <p>• <b>El visor no se ve:</b> el navegador necesita WebGL (activa la aceleración por hardware).<br>• <b>Perdí cambios:</b> reabre el modelador; si hay borrador te lo ofrecerá. Los borradores se guardan en el navegador.<br>• <b>Las rotaciones se ven distintas en el juego:</b> el modelador aplica rotaciones directas en el sistema de coordenadas del archivo; verifica los modelos con rotaciones en Minecraft.<br>• <b>Animaciones:</b> solo interpolación lineal (no Catmull-Rom/bezier) y sin Molang editable; no hay animaciones de controladores.<br>• <b>No incluido:</b> selección múltiple, importar .bbmodel de Blockbench, modelos de Java, texturas animadas.<br>• <b>TypeScript:</b> se comprueba la estructura, no los tipos.<br>• Los proyectos viven en este navegador y este dispositivo: exporta para moverlos.</p></div>
+<div class="px-card gd" id="tools"><h3>11. Herramientas del Toolbox</h3>
+<p>En el editor abre el <b>Toolbox</b> (barra inferior). Todas las herramientas escriben archivos directamente en tu proyecto y te dejan elegir la carpeta de destino.</p>
+<p><b>Img.Json (animación):</b> junta varias imágenes (o un GIF, o un spritesheet) en una animación; con una sola imagen puedes aplicar un efecto (fundido, pulso, rebote, giro, desplazamiento…). Genera la hoja de fotogramas, el modelo, la entidad (RP y BP), el render controller y un script <code>fd_img.js</code> con el manifest actualizado. En el juego: <code>/scriptevent fd:img nombre</code> o <code>/summon fd:img_nombre</code>. También puede crear un <b>bloque animado</b> (flipbook).</p>
+<p><b>Imágenes:</b> importa imágenes sueltas a cualquier carpeta del proyecto.</p>
+<p><b>Texturas:</b> editor pixel-art con las texturas de bloques de Minecraft (descargadas del repositorio oficial Mojang/bedrock-samples). Guarda con el mismo nombre para reemplazar un bloque vanilla, o con otro nombre para una textura nueva.</p>
+<p><b>Bloques:</b> crea bloques personalizados (texturas por cara, luz, dureza, fricción, inflamable…) y los registra en BP, RP, terrain_texture.json y el archivo de idioma.</p>
+<p><b>Estructuras:</b> construye por capas con bloques de Minecraft y guarda un archivo <code>.mcstructure</code> real. Cárgala con <code>/structure load nombre ~ ~ ~</code>.</p>
+<p><b>HUD / Interfaz:</b> diseña pantallas simuladas del juego (imágenes, textos, paneles) y exporta JSON UI listo para el resource pack (<code>ui/</code>, <code>_ui_defs.json</code>, <code>hud_screen.json</code>).</p>
+<p><b>Manifest → Actualizar:</b> cuando salga una versión nueva, ve a Manifest, pulsa «Buscar últimas versiones», elige tu addon y actualiza (o descarga el manifest.json nuevo).</p>
+</div>
 <div class="px-grid"><a class="px-card" href="/manifest/"><h3>Generar manifest</h3><p>UUID listos para usar.</p></a><a class="px-card" href="/commands/"><h3>Ver comandos</h3><p>Prueba tu addon con /summon, /event y /function.</p></a></div>
 </main>
 <footer class="px-foot"><div class="px-wrap"><div class="px-foot-in"><span>© 2026 FireDex · Herramienta independiente, no afiliada a Mojang ni a Microsoft.</span><nav><a href="/terms/">Términos</a><a href="/privacy/">Privacidad</a><a href="/cookies/">Cookies</a><a href="/legal/">Aviso legal</a></nav></div></div></footer>

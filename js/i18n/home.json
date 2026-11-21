@@ -1,0 +1,110 @@
+[
+[
+"FireDex",
+"FireDex"
+],
+[
+"Create addons, models and animations for <span>Minecraft Bedrock</span>",
+"Crea addons, modelos y animaciones de <span>Minecraft Bedrock</span>"
+],
+[
+"Code editor with Minecraft API help, 3D modeler with animations, commands and a manifest generator. All in your browser.",
+"Editor de código con ayuda de la API de Minecraft, modelador 3D con animaciones, comandos y generador de manifest. Todo en tu navegador."
+],
+[
+"+ Create project",
+"+ Crear proyecto"
+],
+[
+"Upload addon",
+"Subir addon"
+],
+[
+"New 3D model",
+"Nuevo modelo 3D"
+],
+[
+"Your projects",
+"Tus proyectos"
+],
+[
+"You have no saved projects yet. Create a new one or upload an addon to get started.",
+"Aún no tienes proyectos guardados. Crea uno nuevo o sube un addon para empezar."
+],
+[
+"Tools",
+"Herramientas"
+],
+[
+"3D Modeler",
+"Modelador 3D"
+],
+[
+"Create Bedrock models and animations without needing an addon.",
+"Crea modelos y animaciones Bedrock sin necesidad de un addon."
+],
+[
+"30+ commands with syntax, example and a copy button.",
+"Más de 30 comandos con sintaxis, ejemplo y botón de copiar."
+],
+[
+"Generate manifest.json with valid UUIDs for BP and RP.",
+"Genera manifest.json con UUID válidos para BP y RP."
+],
+[
+"Folder structure and best practices for an addon.",
+"Estructura de carpetas y buenas prácticas de un addon."
+],
+[
+"Quick guide",
+"Guía rápida"
+],
+[
+"First steps to work with your addons.",
+"Primeros pasos para trabajar con tus addons."
+],
+[
+"Supported versions and formats ›",
+"Versión y formatos compatibles ›"
+],
+[
+"Legal information",
+"Información legal"
+],
+[
+"Contact: <a href=\"mailto:mcforgemx@gmail.com\">mcforgemx@gmail.com</a>",
+"Contacto: <a href=\"mailto:mcforgemx@gmail.com\">mcforgemx@gmail.com</a>"
+],
+[
+"Create a project",
+"Crear un proyecto"
+],
+[
+"Open",
+"Abrir"
+],
+[
+"Rename project",
+"Renombrar proyecto"
+],
+[
+"Delete project",
+"Eliminar proyecto"
+],
+[
+"Delete project?",
+"¿Eliminar proyecto?"
+],
+[
+"All files of this project will be deleted. This action cannot be undone.",
+"Se eliminarán todos los archivos de este proyecto. Esta acción no se puede deshacer."
+],
+[
+"Type the project name <b style=\"color:var(--text);user-select:all\">{0}</b> to confirm.",
+"Escribe el nombre del proyecto <b style=\"color:var(--text);user-select:all\">{0}</b> para confirmar."
+],
+[
+"Project name",
+"Nombre del proyecto"
+]
+]

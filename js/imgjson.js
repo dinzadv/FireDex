@@ -84,7 +84,30 @@
   }
 
   /* Fotogramas de origen de un elemento (sprite sheet → recortados) */
+  const EFFECTS = [['none', 'No effect (static)'], ['fade', 'Fade in / out'], ['pulse', 'Pulse (zoom)'], ['bounce', 'Bounce'], ['shake', 'Shake'], ['spin', 'Spin (turn around)'], ['scroll', 'Scroll (loop)'], ['flash', 'Flash']];
+  function effectFrames(src, kind, n) {
+    const w = src.width, h = src.height, out = [];
+    for (let i = 0; i < n; i++) {
+      const t = i / n, c = mkCanvas(w, h), g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+      const a = Math.PI * 2 * t;
+      if (kind === 'fade') { g.globalAlpha = 0.15 + 0.85 * (0.5 + 0.5 * Math.cos(a)); g.drawImage(src, 0, 0); }
+      else if (kind === 'pulse') { const k = 0.9 + 0.1 * Math.sin(a); g.drawImage(src, w * (1 - k) / 2, h * (1 - k) / 2, w * k, h * k); }
+      else if (kind === 'bounce') { const k = 0.85, dy = -Math.abs(Math.sin(a / 2)) * h * 0.15; g.drawImage(src, w * (1 - k) / 2, h * (1 - k) + h * 0.075 + dy + h * 0.15, w * k, h * k); }
+      else if (kind === 'shake') { const dx = Math.sin(a * 3) * w * 0.04, k = 0.94; g.drawImage(src, w * (1 - k) / 2 + dx, h * (1 - k) / 2, w * k, h * k); }
+      else if (kind === 'spin') { const k = Math.max(0.04, Math.abs(Math.cos(a / 2))); g.drawImage(src, w * (1 - k) / 2, 0, w * k, h); }
+      else if (kind === 'scroll') { const o = Math.round(t * w); g.drawImage(src, -o, 0); g.drawImage(src, w - o, 0); }
+      else if (kind === 'flash') { g.drawImage(src, 0, 0); g.globalCompositeOperation = 'source-atop'; g.globalAlpha = Math.max(0, Math.sin(a)) * 0.8; g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); }
+      else g.drawImage(src, 0, 0);
+      out.push(c);
+    }
+    return out;
+  }
   function srcFrames(it) {
+    const b = baseFrames(it);
+    if (b.length === 1 && it.effect && it.effect !== 'none') return effectFrames(b[0], it.effect, clamp(it.efN || 12, 4, 48));
+    return b;
+  }
+  function baseFrames(it) {
     if (it.frames) return it.frames;
     const cw = Math.floor(it.raw.width / it.cols), ch = Math.floor(it.raw.height / it.rows), out = [];
     for (let i = 0; i < it.count && i < it.cols * it.rows; i++) {
@@ -411,13 +434,13 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
 
   function editHtml() {
     const it = active();
-    return `<div class="tbx-tool-head"><button class="tbx-back" id="ijBack">${UI_ICONS.back}</button><h3>Img.Json <span class="tbx-beta">NUEVO</span></h3></div>
-<p class="ij-lead">Convierte imágenes, GIF o spritesheets en archivos listos para Minecraft Bedrock: textura, modelo, entidad, render controller, script y manifest.</p>
+    return `<div class="tbx-tool-head"><button class="tbx-back" id="ijBack">${UI_ICONS.back}</button><h3>Img.Json · Animator</h3></div>
+<p class="ij-lead">Turn several images (or one image + an effect) into an ANIMATION and get all the Minecraft Bedrock files: spritesheet, model, entity, render controller, script and manifest.</p>
 <div class="imgjson-layout">
   <div class="imgjson-col">
-    <label class="imgjson-upload" id="ijDrop">${UI_ICONS.upload || ''}<span>Soltar o elegir imágenes<br><small>PNG · JPG · GIF · WebP</small></span>
+    <label class="imgjson-upload" id="ijDrop">${UI_ICONS.upload || ''}<span>Drop or choose frames<br><small>PNG · JPG · GIF · WebP</small></span>
       <input type="file" id="ijFile" accept="image/*" multiple hidden></label>
-    <label class="ij-check"><input type="checkbox" id="ijJoin"> Varias imágenes = fotogramas de UNA animación</label>
+    <label class="ij-check"><input type="checkbox" id="ijJoin" checked> Several images = frames of ONE animation (sorted by name)</label>
     <div class="imgjson-list" id="ijList">${items.length ? items.map((x) => `<div class="imgjson-item${x.id === activeId ? ' active' : ''}" data-id="${x.id}">
       <img src="${x.thumb || thumbOf(x)}" alt=""><div class="imgjson-item-info"><div class="imgjson-item-name">${esc(x.name)}</div><div class="imgjson-item-dim">${x.mode === 'block' ? 'Bloque' : 'Póster'} · ${srcFrames(x).length} fot.</div></div>
       <button class="imgjson-item-remove" data-rm="${x.id}" title="Quitar">${UI_ICONS.close || '×'}</button></div>`).join('') : '<div class="imgjson-empty">Aún no hay imágenes.</div>'}</div>
@@ -438,6 +461,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
   <p class="imgjson-meta-info">${it.mode === 'poster' ? 'Entidad plana (ancho y alto en bloques) que se coloca con un comando. Cuadros de cualquier proporción.' : 'Bloque con textura animada (flipbook). Los fotogramas se ajustan a un cuadrado.'}</p>
   ${isSheet ? `<div class="imgjson-field-row">${field('Columnas', `<input type="number" min="1" max="64" data-k="cols" value="${it.cols}">`)}${field('Filas', `<input type="number" min="1" max="64" data-k="rows" value="${it.rows}">`)}</div>
   ${field('Fotogramas a usar', `<input type="number" min="1" max="${it.cols * it.rows}" data-k="count" value="${it.count}">`)}` : ''}
+  ${baseFrames(it).length === 1 ? `<div class="imgjson-field-row">${field('Animation effect (one image)', `<select data-k="effect">${EFFECTS.map((e) => `<option value="${e[0]}"${(it.effect || 'none') === e[0] ? ' selected' : ''}>${e[1]}</option>`).join('')}</select>`)}${field('Frames', `<input type="number" min="4" max="48" data-k="efN" value="${it.efN || 12}">`)}</div>` : ''}
   <div class="imgjson-field-row">
     ${field('Velocidad (fps)', `<input type="number" min="1" max="30" step="1" data-k="fps" value="${it.fps}">`)}
     ${it.mode === 'poster' ? field('Ancho (bloques)', `<input type="number" min="0.5" max="32" step="0.5" data-k="widthBlocks" value="${it.widthBlocks}">`) : field('Tamaño (px)', `<select data-k="size">${[16, 32, 64, 128].map((s) => `<option${s === it.size ? ' selected' : ''}>${s}</option>`).join('')}</select>`)}
@@ -488,7 +512,9 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
       else if (inp.tagName === 'SELECT' || inp.type === 'number') it[k] = num(inp.value, it[k]);
       if (k === 'cols' || k === 'rows') { it.cols = clamp(Math.round(it.cols), 1, 64); it.rows = clamp(Math.round(it.rows), 1, 64); it.count = it.cols * it.rows; }
       if (k === 'count') it.count = clamp(Math.round(it.count), 1, it.cols * it.rows);
+      if (k === 'effect') it[k] = inp.value;
       if (k === 'fps') it.fps = clamp(Math.round(it.fps), 1, 30);
+      if (k === 'efN') it.efN = clamp(Math.round(it.efN), 4, 48);
       it.thumb = null; refresh();
     });
     root.querySelector('#ijGen').onclick = generate;
@@ -522,6 +548,19 @@ ${r.warnings.map((w) => `<div class="manifest-check bad">${esc(w)}</div>`).join(
     const f = findPacks()[kind]; if (f) return f;
     const m = makePack(kind); m.manifest.content = J(m.json); return m;
   }
-  window.FD_UTIL = { ensurePack, getFile, J, slug, esc, parseJson };
+  /* Carpetas del proyecto como rutas "a/b/c" (para selectores de destino) */
+  function folderPaths(node = state.root, pre = '', out = []) {
+    (node.children || []).forEach((c) => { if (c.type === 'folder') { const p = pre ? pre + '/' + c.name : c.name; out.push(p); folderPaths(c, p, out); } });
+    return out;
+  }
+  /* Devuelve (creando si hace falta) la carpeta de una ruta "a/b/c" desde la raíz del proyecto */
+  function folderByPath(path) {
+    return getFolder(String(path || '').split('/').map((x) => x.trim()).filter(Boolean), state.root);
+  }
+  /* Guarda un archivo (texto o dataURL) en ruta relativa a la raíz del proyecto; devuelve {node,created} */
+  function writeProjectFile(path, content) {
+    const r = getFile(path, state.root); r.node.content = content; return r;
+  }
+  window.FD_UTIL = { ensurePack, getFile, getFolder, folderPaths, folderByPath, writeProjectFile, findPacks, J, slug, esc, parseJson, uuid: () => uuidv4() };
   window.openImgJsonTool = open;
 })();

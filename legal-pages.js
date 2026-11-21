@@ -49,6 +49,7 @@ module.exports = function (L) {
       row('comdex_side_hidden', 'localStorage (propia)', 'Recuerda si ocultaste el panel de archivos.', 'Hasta que lo borres') +
       row('fd_draft_*', 'localStorage (propia)', 'Borrador de seguridad del modelador para recuperar cambios sin guardar.', 'Hasta guardar o descartar') +
       row('fd_cookie_notice', 'localStorage (propia)', 'Recuerda que viste este aviso.', 'Hasta que lo borres') +
+      row('fd_lang', 'localStorage (propia)', 'Recuerda el idioma elegido (inglés o español).', 'Hasta que lo borres') +
       `</table></div><p>Todos son <b>necesarios</b> o de <b>preferencias funcionales</b> que tú generas al usar el editor, y son <b>propios</b> (no de terceros).</p>`) +
     sec(3, 'Recursos de terceros', `<p>Las tipografías se cargan desde <b>Google Fonts</b>. Esto es una petición a un servicio de terceros que recibe tu dirección IP; en condiciones normales no se usa para ello una cookie de seguimiento propia del sitio. Más información en la política de privacidad de Google. Detalle en la <a href="/privacy/#s3">Política de privacidad</a>.</p>`) +
     sec(4, 'Lo que NO usamos', `<p>No usamos Google Analytics ni similares, píxeles de seguimiento, cookies publicitarias, redes sociales incrustadas ni huellas digitales del navegador. Si en el futuro añadimos alguno, pediremos tu consentimiento previo y actualizaremos esta página.</p>`) +

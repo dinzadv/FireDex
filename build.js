@@ -9,7 +9,7 @@ const shell = (file, title, body, extra = '', desc = '') => `<!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${title} · FireDex</title><meta name="description" content="${desc || 'FireDex: editor de código, modelador 3D y animaciones para addons de Minecraft Bedrock, todo en tu navegador.'}"><meta name="theme-color" content="#14151c">
 <link rel="icon" type="image/png" href="/img/logo-64.png"><link rel="apple-touch-icon" href="/img/logo-192.png">
-<link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="/css/pixel.css"></head>
+<link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="/css/pixel.css"><script src="/js/i18n.js"></script></head>
 <body class="px-page"><canvas id="particles"></canvas>
 <header class="px-top"><div class="px-wrap"><a href="/"><img src="/img/logo.png" alt="FireDex"></a><b class="px" style="font-size:26px">FireDex</b><span class="sp"></span>
 <a class="px-btn sm" href="/commands/">Comandos</a><a class="px-btn sm green" href="/guide/">Guía</a></div></header>
@@ -93,7 +93,8 @@ out('manifest/index.html', shell('/manifest/', 'Manifest', `
 <select id="sv"><option>2.11.0</option><option>2.0.0</option><option>1.18.0</option></select> <select id="ui"><option value="">Sin server-ui</option><option value="2.3.0">+ @minecraft/server-ui 2.3.0</option></select>
 <button class="px-btn green" id="g">Generar</button></div>
 <p style="opacity:.7;font-size:13px">Referencia (nov-2026): Bedrock estable 26.63 · @minecraft/server 2.11.0 · @minecraft/server-ui 2.3.0 (requiere server 2.x). <code>min_engine_version</code> con numeración 26.x no está verificado; 1.21.50 funciona en clientes nuevos.</p>
-<div class="px-card"><h3 id="fn">manifest.json</h3><code class="cmd" id="o" style="max-height:420px"></code><button class="px-btn" id="c">Copiar</button> <button class="px-btn yellow" id="s">Descargar</button></div>`,
+<div class="px-card"><h3 id="fn">manifest.json</h3><code class="cmd" id="o" style="max-height:420px"></code><button class="px-btn" id="c">Copiar</button> <button class="px-btn yellow" id="s">Descargar</button></div>
+<section id="upd" style="margin-top:34px"></section>`,
 `<script>const $=s=>document.querySelector(s),u=()=>crypto.randomUUID();
 function gen(){const bp=$('#t').value=='bp',v=$('#v').value.split('.').map(Number);
 const m={format_version:2,header:{name:$('#n').value,description:$('#d').value,uuid:u(),version:[1,0,0],min_engine_version:v.length==3?v:[1,21,50]},modules:[{type:bp?'data':'resources',uuid:u(),version:[1,0,0]}]};
@@ -101,7 +102,7 @@ if(bp&&$('#sc').checked){m.modules.push({type:'script',language:'javascript',uui
 $('#o').textContent=JSON.stringify(m,null,2);$('#fn').textContent=(bp?'behavior_pack':'resource_pack')+'/manifest.json'}
 $('#g').onclick=gen;gen();
 $('#c').onclick=e=>navigator.clipboard.writeText($('#o').textContent).then(()=>{e.target.textContent='¡Copiado!'});
-$('#s').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('#o').textContent],{type:'application/json'}));a.download='manifest.json';a.click()};</script>`));
+$('#s').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('#o').textContent],{type:'application/json'}));a.download='manifest.json';a.click()};</script><script src="/js/versions.js"></script><script src="/js/manifest-update.js"></script>`));
 
 // ---------- guía ----------
 out('guide/index.html', shell('/guide/', 'Guía', `
@@ -109,7 +110,7 @@ out('guide/index.html', shell('/guide/', 'Guía', `
 <h1 class="px" style="font-size:44px;margin:0">Guía de FireDex</h1>
 <p class="gd-lead">Todo lo que necesitas para crear addons, modelos y animaciones de Minecraft Bedrock, y para entender cómo funciona FireDex por dentro.</p>
 <div class="px-card gd-toc"><h3>Contenido</h3><p>
-<a href="#inicio">1. Inicio rápido</a> · <a href="#proyectos">2. Proyectos y datos</a> · <a href="#addon">3. Estructura de un addon</a> · <a href="#editor">4. Editor de código</a> · <a href="#modelador">5. Modelador 3D</a> · <a href="#animaciones">6. Animaciones</a> · <a href="#integracion">7. Integración con el addon</a> · <a href="#atajos">8. Atajos</a> · <a href="#dev">9. Para desarrolladores</a> · <a href="#problemas">10. Problemas y límites</a></p></div>
+<a href="#inicio">1. Inicio rápido</a> · <a href="#proyectos">2. Proyectos y datos</a> · <a href="#addon">3. Estructura de un addon</a> · <a href="#editor">4. Editor de código</a> · <a href="#modelador">5. Modelador 3D</a> · <a href="#animaciones">6. Animaciones</a> · <a href="#integracion">7. Integración con el addon</a> · <a href="#atajos">8. Atajos</a> · <a href="#dev">9. Para desarrolladores</a> · <a href="#problemas">10. Problemas y límites</a> · <a href="#tools">11. Herramientas</a></p></div>
 
 <div class="px-card gd" id="inicio"><h3>1. Inicio rápido</h3>
 <p><b>Crear un addon:</b> en Inicio pulsa <b>Crear proyecto</b> o sube un .mcaddon/.mcpack/.zip. Se abre el <b>editor de código</b> con el árbol de archivos.</p>
@@ -227,6 +228,16 @@ css/*.css          pixel.css (menú), editor.css, model.css</code>
 
 <div class="px-card gd" id="problemas"><h3>10. Problemas y límites</h3>
 <p>• <b>El visor no se ve:</b> el navegador necesita WebGL (activa la aceleración por hardware).<br>• <b>Perdí cambios:</b> reabre el modelador; si hay borrador te lo ofrecerá. Los borradores se guardan en el navegador.<br>• <b>Las rotaciones se ven distintas en el juego:</b> el modelador aplica rotaciones directas en el sistema de coordenadas del archivo; verifica los modelos con rotaciones en Minecraft.<br>• <b>Animaciones:</b> solo interpolación lineal (no Catmull-Rom/bezier) y sin Molang editable; no hay animaciones de controladores.<br>• <b>No incluido:</b> selección múltiple, importar .bbmodel de Blockbench, modelos de Java, texturas animadas.<br>• <b>TypeScript:</b> se comprueba la estructura, no los tipos.<br>• Los proyectos viven en este navegador y este dispositivo: exporta para moverlos.</p></div>
+<div class="px-card gd" id="tools"><h3>11. Herramientas del Toolbox</h3>
+<p>En el editor abre el <b>Toolbox</b> (barra inferior). Todas las herramientas escriben archivos directamente en tu proyecto y te dejan elegir la carpeta de destino.</p>
+<p><b>Img.Json (animación):</b> junta varias imágenes (o un GIF, o un spritesheet) en una animación; con una sola imagen puedes aplicar un efecto (fundido, pulso, rebote, giro, desplazamiento…). Genera la hoja de fotogramas, el modelo, la entidad (RP y BP), el render controller y un script <code>fd_img.js</code> con el manifest actualizado. En el juego: <code>/scriptevent fd:img nombre</code> o <code>/summon fd:img_nombre</code>. También puede crear un <b>bloque animado</b> (flipbook).</p>
+<p><b>Imágenes:</b> importa imágenes sueltas a cualquier carpeta del proyecto.</p>
+<p><b>Texturas:</b> editor pixel-art con las texturas de bloques de Minecraft (descargadas del repositorio oficial Mojang/bedrock-samples). Guarda con el mismo nombre para reemplazar un bloque vanilla, o con otro nombre para una textura nueva.</p>
+<p><b>Bloques:</b> crea bloques personalizados (texturas por cara, luz, dureza, fricción, inflamable…) y los registra en BP, RP, terrain_texture.json y el archivo de idioma.</p>
+<p><b>Estructuras:</b> construye por capas con bloques de Minecraft y guarda un archivo <code>.mcstructure</code> real. Cárgala con <code>/structure load nombre ~ ~ ~</code>.</p>
+<p><b>HUD / Interfaz:</b> diseña pantallas simuladas del juego (imágenes, textos, paneles) y exporta JSON UI listo para el resource pack (<code>ui/</code>, <code>_ui_defs.json</code>, <code>hud_screen.json</code>).</p>
+<p><b>Manifest → Actualizar:</b> cuando salga una versión nueva, ve a Manifest, pulsa «Buscar últimas versiones», elige tu addon y actualiza (o descarga el manifest.json nuevo).</p>
+</div>
 <div class="px-grid"><a class="px-card" href="/manifest/"><h3>Generar manifest</h3><p>UUID listos para usar.</p></a><a class="px-card" href="/commands/"><h3>Ver comandos</h3><p>Prueba tu addon con /summon, /event y /function.</p></a></div>
 `));
 const LP = require('./legal-pages.js')(LEGAL);

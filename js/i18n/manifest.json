@@ -1,0 +1,58 @@
+[
+[
+"<a href=\"/\">Home</a> › Manifest",
+"<a href=\"/\">Inicio</a> › Manifest"
+],
+[
+"Manifest generator",
+"Generador de manifest"
+],
+[
+"Name",
+"Nombre"
+],
+[
+"Description",
+"Descripción"
+],
+[
+"min_engine_version (e.g. 1.21.50)",
+"min_engine_version (ej. 1.21.50)"
+],
+[
+"Include script module (Behavior pack only)",
+"Incluir módulo de scripts (solo Behavior pack)"
+],
+[
+"No server-ui",
+"Sin server-ui"
+],
+[
+"Generate",
+"Generar"
+],
+[
+"Reference (Nov 2026): stable Bedrock 26.63 · @minecraft/server 2.11.0 · @minecraft/server-ui 2.3.0 (requires server 2.x). <code>min_engine_version</code> with 26.x numbering is not verified; 1.21.50 works on current clients.",
+"Referencia (nov-2026): Bedrock estable 26.63 · @minecraft/server 2.11.0 · @minecraft/server-ui 2.3.0 (requiere server 2.x). <code>min_engine_version</code> con numeración 26.x no está verificado; 1.21.50 funciona en clientes nuevos."
+],
+[
+"Copy",
+"Copiar"
+],
+[
+"Download",
+"Descargar"
+],
+[
+"Creado con FireDex",
+"Created with FireDex"
+],
+[
+"Mi Addon",
+"My Addon"
+],
+[
+"When Minecraft or the Script API gets a new version, update your manifests in one click: choose an addon from this browser (or download the new manifest.json).",
+"Cuando Minecraft o la Script API tengan una versión nueva, actualiza tus manifests con un clic: elige un addon de este navegador (o descarga el manifest.json nuevo)."
+]
+]
