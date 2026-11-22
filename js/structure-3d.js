@@ -2,9 +2,8 @@
   const hooks = (window.FD_STRUCT_HOOKS = window.FD_STRUCT_HOOKS || []);
   const T = (s) => (window.FD_I18N ? FD_I18N.t(s) : s);
   const CAP = 120000;
-  const TRANS = /glass|leaves|ice$|water|lava|barrier|bars|flower|torch|grass$|fern|vine|sapling|rose|tulip|dandelion|web|rail|ladder|sign|door|fence|pane|portal|candle|button|lever|banner|carpet|slab|stairs|bed$|chest|barrel|skull|head|pot$|lantern|chain|bell|anvil|cauldron|hopper/;
-  const TINT = /leaves|grass_block|:grass$|fern|vine|lily/;
-  const FACES = [
+  const TRANS = /glass|leaves|ice$|water|lava|barrier|bars|flower|torch|grass$|fern|vine|sapling|rose|tulip|dandelion|web|rail|ladder|sign|door|fence|pane|portal|candle|button|lever|banner|carpet|slab|stairs|bed$|chest|barrel|skull|head|pot$|lantern|chain|bell|anvil|cauldron|hopper|snow_layer|mushroom|roots|fungus|reeds|bush|orchid|allium|azure|cornflower|daisy|dead|sugar_cane/;
+    const FACES = [
     { n: [0, 1, 0], o: [0, 1, 0], u: [1, 0, 0], v: [0, 0, 1], sh: 1 },
     { n: [0, -1, 0], o: [0, 0, 0], u: [1, 0, 0], v: [0, 0, 1], sh: 0.5 },
     { n: [1, 0, 0], o: [1, 1, 1], u: [0, 0, -1], v: [0, -1, 0], sh: 0.78 },
@@ -15,7 +14,6 @@
   const cam = { yaw: 0.78, pitch: 0.62, zoom: 1, px: 0, py: 0, mode: "place" };
   const fpts = new Float32Array(CAP * 8), fcell = new Int32Array(CAP * 6);
   let A = null, root = null, cv = null, bar = null, hint = null, nF = 0, raf = 0, on = false, hover = null, note = "";
-  const tints = new Map();
   const ptrs = new Map();
   let drag = null, pinch = null, M = null;
 
@@ -53,23 +51,28 @@
     const base = A.baseOf(str), e = A.tx(base);
     return { base, e };
   }
-  function tileFor(base, e) {
-    if (!e.img || !e.img.complete || !e.img.naturalWidth) return null;
-    if (!TINT.test(base)) return e.img;
-    let t = tints.get(base);
-    if (t && t.src === e.img) return t.c;
-    const w = Math.min(e.img.naturalWidth, e.img.naturalHeight), c = document.createElement("canvas");
-    c.width = c.height = w;
-    const g = c.getContext("2d");
-    g.drawImage(e.img, 0, 0, w, w, 0, 0, w, w);
-    g.globalCompositeOperation = "multiply";
-    g.fillStyle = /leaves|vine|lily/.test(base) ? "#5a9a3c" : "#79c05a";
-    g.fillRect(0, 0, w, w);
-    g.globalCompositeOperation = "destination-in";
-    g.drawImage(e.img, 0, 0, w, w, 0, 0, w, w);
-    tints.set(base, { src: e.img, c });
-    return c;
+  // Textura de una cara concreta (up/down/north/south/east/west) con su tinte ya aplicado
+  const DIRN = [[0, 1, 0, "up"], [0, -1, 0, "down"], [1, 0, 0, "east"], [-1, 0, 0, "west"], [0, 0, 1, "south"], [0, 0, -1, "north"]];
+  function faceTile(e, fi) {
+    if (!e || !e.faces) return e && (e.tile || e.img) || null;
+    const f = e.faces[DIRN[fi][3]];
+    return f && f.tile || null;
   }
+  // Dibuja un paralelogramo texturizado: origen (ox,oy,oz) + u + v en coordenadas de mundo
+  function texQuad(g, dpr, o, u, v, img, rect, shade) {
+    proj(o[0], o[1], o[2], P2, 0);
+    proj(o[0] + u[0], o[1] + u[1], o[2] + u[2], P2, 2);
+    proj(o[0] + v[0], o[1] + v[1], o[2] + v[2], P2, 4);
+    const ax = P2[2] - P2[0], ay = P2[3] - P2[1], bx = P2[4] - P2[0], by = P2[5] - P2[1];
+    g.setTransform(dpr * ax, dpr * ay, dpr * bx, dpr * by, dpr * P2[0], dpr * P2[1]);
+    g.drawImage(img, rect[0], rect[1], rect[2], rect[3], -0.012, -0.012, 1.024, 1.024);
+    if (shade < 1) {
+      g.fillStyle = "rgba(0,0,0," + (1 - shade).toFixed(2) + ")";
+      g.fillRect(-0.012, -0.012, 1.024, 1.024);
+    }
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  const P2 = new Float32Array(8);
 
   function draw() {
     raf = 0;
@@ -115,7 +118,7 @@
     const x0 = b ? b.x0 : 0, x1 = b ? b.x1 : S.sx - 1, z0 = b ? b.z0 : 0, z1 = b ? b.z1 : S.sz - 1;
     if (b) y0 = Math.max(y0, b.y0);
     const gridA = S.grid, sy = S.sy, sz = S.sz;
-    const opq = new Uint8Array(S.pal.length), col = [], info = [];
+    const opq = new Uint8Array(S.pal.length), col = [], colS = [], info = [], mods = [];
     S.pal.forEach((str, i) => {
       if (!i) return;
       const base = A.baseOf(str);
@@ -123,6 +126,8 @@
       const en = entryFor(str);
       info[i] = en;
       col[i] = A.rgbOf(base);
+      colS[i] = A.rgbSide ? A.rgbSide(base) : col[i];
+      mods[i] = window.FD_MC ? FD_MC.model(base, str) : null;
     });
     const gx = M.sy * M.cp, gy = -M.sp, gz = M.cy * M.cp;
     const xs = [], ys = [], zs = [];
@@ -148,9 +153,18 @@
           proj(x + 0.5, y + 0.5, z + 0.5, tmp, 0);
           if (tmp[0] < -margin || tmp[0] > W + margin || tmp[1] < -margin || tmp[1] > H + margin) continue;
           const en = info[id];
-          let tile = null;
-          if (!flat && en) tile = tileFor(en.base, en.e);
-          const c = col[id] || [128, 128, 128];
+          const mod = !flat ? mods[id] : null;
+          const c = col[id] || [128, 128, 128], cs = colS[id] || c;
+          if (mod) {
+            const ob = [x, y, z];
+            if (mod.quads) mod.quads.forEach((q) => texQuad(g, dpr, [x + q.o[0], y + q.o[1], z + q.o[2]], q.u, q.v, q.img, q.rect, 1));
+            mod.faces.forEach((f) => {
+              if (f.n[0] * gx + f.n[1] * gy + f.n[2] * gz >= 0) return;
+              if (f.edge && opq[cell(x + f.n[0], y + f.n[1], z + f.n[2])]) return;
+              texQuad(g, dpr, [x + f.o[0], y + f.o[1], z + f.o[2]], f.u, f.v, f.img, f.rect, f.shade);
+            });
+            void ob;
+          }
           for (let fi = 0; fi < 6; fi++) {
             if (!vis[fi]) continue;
             const f = FACES[fi], nx = x + f.n[0], ny = y + f.n[1], nz = z + f.n[2];
@@ -174,10 +188,12 @@
               fcell[m + 5] = f.n[2];
               nF++;
             }
+            if (mod) continue;
+            const tile = !flat && en ? faceTile(en.e, fi) : null;
             if (tile) {
               const ax = P[2] - P[0], ay = P[3] - P[1], bx = P[6] - P[0], by = P[7] - P[1];
               g.setTransform(dpr * ax, dpr * ay, dpr * bx, dpr * by, dpr * P[0], dpr * P[1]);
-              const tw = Math.min(tile.naturalWidth || tile.width, tile.naturalHeight || tile.height);
+              const tw = tile.width || Math.min(tile.naturalWidth, tile.naturalHeight);
               g.drawImage(tile, 0, 0, tw, tw, -0.012, -0.012, 1.024, 1.024);
               if (f.sh < 1) {
                 g.fillStyle = "rgba(0,0,0," + (1 - f.sh).toFixed(2) + ")";
@@ -185,7 +201,8 @@
               }
               g.setTransform(dpr, 0, 0, dpr, 0, 0);
             } else {
-              g.fillStyle = "rgb(" + ((c[0] * f.sh) | 0) + "," + ((c[1] * f.sh) | 0) + "," + ((c[2] * f.sh) | 0) + ")";
+              const cc = fi < 2 ? c : cs;
+              g.fillStyle = "rgb(" + ((cc[0] * f.sh) | 0) + "," + ((cc[1] * f.sh) | 0) + "," + ((cc[2] * f.sh) | 0) + ")";
               g.beginPath();
               g.moveTo(P[0], P[1]);
               g.lineTo(P[2], P[3]);

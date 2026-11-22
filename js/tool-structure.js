@@ -1,6 +1,6 @@
 (function() {
   "use strict";
-  const U = window.FD_UTIL, V = window.FD_VERSIONS || { server: "2.0.0" }, VAN = window.FD_VANILLA, D = window.FD_STRUCT_DATA;
+  const U = window.FD_UTIL, V = window.FD_VERSIONS || { server: "2.0.0" }, VAN = window.FD_VANILLA, MC = window.FD_MC, D = window.FD_STRUCT_DATA;
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
   const T = (s) => window.FD_I18N ? FD_I18N.t(s) : s;
@@ -253,15 +253,16 @@
     }
   }
   function tx(base) {
+    if (MC) return MC.entry(base);
     let e = TX.get(base);
     if (e) return e;
-    e = { img: null, name: null, avg: null, p: null };
+    e = { img: null, tile: null, name: null, avg: null, p: null };
     TX.set(base, e);
     e.p = !VAN ? Promise.resolve(e) : ensureList().then((set) => {
       const n = D.texNames(base).find((x) => set.has(x));
       if (!n) return e;
       return VAN.image(n).then((img) => {
-        e.img = img;
+        e.img = e.tile = img;
         e.name = n;
         e.avg = avgColor(img);
         redrawHook && redrawHook();
@@ -272,6 +273,7 @@
   }
   const IX =  new Map();
   function ix(name) {
+    if (MC) return MC.item(name);
     let e = IX.get(name);
     if (e) return e;
     e = { url: null, p: null };
@@ -290,7 +292,7 @@
   }
   const rgbCache = {};
   function rgbOf(base) {
-    const e = TX.get(base);
+    const e = tx(base);
     if (e && e.avg) return e.avg;
     if (rgbCache[base]) return rgbCache[base];
     const c = D.colorFor(base);
@@ -302,15 +304,29 @@
     const d = x.getImageData(0, 0, 1, 1).data;
     return rgbCache[base] = [d[0], d[1], d[2]];
   }
+  function rgbSide(base) {
+    const e = tx(base);
+    return e && e.avgSide ? e.avgSide : rgbOf(base);
+  }
+  const pix = (el, url) => {
+    el.style.backgroundImage = "url(" + url + ")";
+    el.style.backgroundSize = "100% 100%";
+    el.style.imageRendering = "pixelated";
+  };
   function paintBlock(el, s) {
     const base = baseOf(s);
     el.style.background = D.colorFor(base);
+    if (MC) {
+      const ic = MC.icon(base, s);
+      const apply = () => {
+        if (ic.url) pix(el, ic.url);
+      };
+      ic.url ? apply() : ic.p.then(apply);
+      return;
+    }
     const e = tx(base);
     const apply = () => {
-      if (e.name) {
-        el.style.backgroundImage = "url(" + VAN.url(e.name) + ")";
-        el.style.backgroundSize = "100% 100%";
-      }
+      if (e.name) pix(el, VAN.url(e.name));
     };
     if (e.name) apply();
     else e.p.then(apply);
@@ -325,16 +341,21 @@
       return;
     }
     const blockish = D.BLOCK_CAT[n] !== void 0;
+    const letter = () => {
+      el.textContent = n.charAt(0).toUpperCase();
+      el.classList.add("letter");
+    };
     const tryBlock = () => {
+      if (MC) {
+        const ic = MC.icon("minecraft:" + n, "");
+        const a = () => ic.url ? pix(el, ic.url) : letter();
+        ic.url ? a() : ic.p.then(a);
+        return;
+      }
       const b = tx(n);
       const a = () => {
-        if (b.name) {
-          el.style.backgroundImage = "url(" + VAN.url(b.name) + ")";
-          el.style.backgroundSize = "100% 100%";
-        } else {
-          el.textContent = n.charAt(0).toUpperCase();
-          el.classList.add("letter");
-        }
+        if (b.name) pix(el, VAN.url(b.name));
+        else letter();
       };
       b.name ? a() : b.p.then(a);
     };
@@ -342,10 +363,8 @@
     else {
       const e = ix(n);
       const a = () => {
-        if (e.url) {
-          el.style.backgroundImage = "url(" + e.url + ")";
-          el.style.backgroundSize = "100% 100%";
-        } else tryBlock();
+        if (e.url) pix(el, e.url);
+        else tryBlock();
       };
       e.url ? a() : e.p.then(a);
     }
@@ -1029,6 +1048,10 @@
       reqDraw();
       if (window.FD_S3) FD_S3.redraw();
     };
+    if (MC && !window.__fdMcHooked) {
+      window.__fdMcHooked = true;
+      MC.onUpdate(() => redrawHook && redrawHook());
+    }
     wire();
     renderBlocks();
     renderHot();
@@ -1296,8 +1319,13 @@
       if (!s) continue;
       const e = tex ? tx(baseOf(s)) : null;
       g.globalAlpha = a;
-      if (e && e.img) g.drawImage(e.img, 0, 0, e.img.naturalWidth, e.img.naturalWidth, px, py, ceil(z), ceil(z));
-      else {
+      const ic = tex && MC && e && e.done && MC.shapeOf(e.id) !== "cube" && /^(chest|cross)$/.test(MC.shapeOf(e.id)) ? MC.icon(baseOf(s), s) : null;
+      if (ic && ic.canvas) g.drawImage(ic.canvas, px, py, ceil(z), ceil(z));
+      else if (e && (e.tile || e.img)) {
+        const t = e.tile || e.img;
+        const tw = t.width || Math.min(t.naturalWidth, t.naturalHeight);
+        g.drawImage(t, 0, 0, tw, tw, px, py, ceil(z), ceil(z));
+      } else {
         g.fillStyle = colr(s);
         g.fillRect(px, py, ceil(z), ceil(z));
       }
@@ -1438,7 +1466,7 @@
       const q1 = inv(vx + 1, vz), q2 = inv(vx, vz + 1);
       const up = !solid(x, y + 1, z), fx = vx + 1 >= dx || !solid(q1[0], y, q1[1]), fz = vz + 1 >= dz || !solid(q2[0], y, q2[1]);
       if (!up && !fx && !fz) continue;
-      const c = rgbOf(baseOf(S.pal[id])), px = ox + (vx - vz) * w / 2, py = oy + (vx + vz) * h / 2 - y * h - h / 2 + 0;
+      const bs = baseOf(S.pal[id]), c = rgbOf(bs), cs = rgbSide(bs), px = ox + (vx - vz) * w / 2, py = oy + (vx + vz) * h / 2 - y * h - h / 2 + 0;
       if (up) {
         g.fillStyle = shade(c, 1);
         g.beginPath();
@@ -1449,7 +1477,7 @@
         g.fill();
       }
       if (fz) {
-        g.fillStyle = shade(c, 0.7);
+        g.fillStyle = shade(cs, 0.82);
         g.beginPath();
         g.moveTo(px - w / 2, py);
         g.lineTo(px, py + h / 2);
@@ -1458,7 +1486,7 @@
         g.fill();
       }
       if (fx) {
-        g.fillStyle = shade(c, 0.5);
+        g.fillStyle = shade(cs, 0.64);
         g.beginPath();
         g.moveTo(px + w / 2, py);
         g.lineTo(px, py + h / 2);
@@ -2675,7 +2703,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
     return S;
   }, get root() {
     return root;
-  }, place, setB, beginOp, endOp, afterEdit, changed, tx, rgbOf, baseOf, gi, inb, palIdx, setCur, bbox, toast, doUndo, doRedo };
+  }, place, setB, beginOp, endOp, afterEdit, changed, tx, rgbOf, rgbSide, baseOf, gi, inb, palIdx, setCur, bbox, toast, doUndo, doRedo };
   window.FD_STRUCT_API = API;
   window.FD_STRUCT = { buildPiece, NB, D: () => D, get state() {
     return S;
