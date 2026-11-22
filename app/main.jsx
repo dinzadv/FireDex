@@ -20,9 +20,9 @@ function normalize(p) {
   if (!x.endsWith("/")) x += "/";
   return x;
 }
-function App() {
-  const path = normalize(location.pathname);
+export function App({ route }) {
+  const path = normalize(route || location.pathname);
   const Page = ROUTES[path] || (() => <NotFound />);
   return <Shell path={ROUTES[path] ? path : ""}><Page /></Shell>;
 }
-createRoot(document.getElementById("root")).render(<App />);
+if (typeof document !== "undefined" && document.getElementById("root")) createRoot(document.getElementById("root")).render(<App />);

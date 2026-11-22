@@ -857,6 +857,9 @@
   }
   const emptySet = () => ({ id: "loot_" + S.loot_n++, name: "Loot " + (S.loots.length + 1), pools: [{ min: 1, max: 3, nothing: 0, entries: [] }] });
   const IC = {
+    eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+    dots: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
+    cube: '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3ZM4 7.5 12 12l8-4.5M12 12v9"/>',
     pencil: '<path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 3 0l0 0a2 2 0 0 1 0 3L8 19l-4 1z"/>',
     eraser: '<path d="M4 15l8-9 7 6-5 6H8z"/><path d="M9 20h11"/>',
     fill: '<path d="M6 11l5.5-5.5 7 7L13 18z"/><path d="M19 16c1.2 1.8 1.2 3 0 4"/><path d="M4 20h6"/>',
@@ -878,13 +881,85 @@
     x: '<path d="m6 6 12 12M18 6 6 18"/>',
     rot: '<path d="M20 11A8 8 0 1 0 18.6 16"/><path d="M20 5v6h-6"/>'
   };
-  const ico = (k, w) => `<svg viewBox="0 0 24 24" width="${w || 18}" height="${w || 18}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>`;
+  const PXN = { pencil: "edit", fill: "paint-bucket", undo: "undo", redo: "redo", menu: "menu", plus: "plus", minus: "minus", x: "close", eye: "eye", dots: "more-horizontal", paste: "clipboard", rot: "reload", cube: "cube" };
+  const ico = (k, w) => `<svg${PXN[k] ? ' data-px="' + PXN[k] + '"' : ""} viewBox="0 0 24 24" width="${w || 18}" height="${w || 18}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>`;
   const TOOLS = [["pencil", "Pencil", "B"], ["eraser", "Eraser", "E"], ["fill", "Fill", "G"], ["line", "Line", "L"], ["rect", "Rectangle", "R"], ["ellipse", "Ellipse", "O"], ["sphere", "Sphere", "C"], ["select", "Select", "M"], ["pick", "Picker", "I"], ["container", "Container", "K"], ["pan", "Pan", "H"]];
   const $ = (s) => root.querySelector(s);
   const toast = (m) => showToast(m);
+  const DKEY = () => "fd_struct_draft_" + (typeof state !== "undefined" && state ? state.id : "x");
+  function rle(g) {
+    const out = [];
+    let p = g[0], n = 1;
+    for (let i = 1; i < g.length; i++) {
+      if (g[i] === p) n++;
+      else {
+        out.push(p, n);
+        p = g[i];
+        n = 1;
+      }
+    }
+    out.push(p, n);
+    return out;
+  }
+  function unrle(a, len) {
+    const g = new Uint16Array(len);
+    let i = 0;
+    for (let k = 0; k < a.length; k += 2) {
+      g.fill(a[k], i, i + a[k + 1]);
+      i += a[k + 1];
+    }
+    return g;
+  }
+  let draftT = 0;
+  function saveDraftSoon() {
+    clearTimeout(draftT);
+    draftT = setTimeout(() => {
+      try {
+        if (!S || !countBlocks()) {
+          localStorage.removeItem(DKEY());
+          return;
+        }
+        const j = JSON.stringify({ v: 1, name: S.name, sx: S.sx, sy: S.sy, sz: S.sz, pal: S.pal, g: rle(S.grid), chests: Array.from(S.chests.entries()), loots: S.loots, hot: S.hot, hi: S.hi, folder: S.folder, script: S.script, split: S.split, tile: S.tile, walls: S.walls });
+        if (j.length < 4e6) localStorage.setItem(DKEY(), j);
+      } catch (e) {
+      }
+    }, 900);
+  }
+  function loadDraft() {
+    try {
+      const j = JSON.parse(localStorage.getItem(DKEY()) || "null");
+      if (!j || j.v !== 1) return null;
+      const s = newState();
+      Object.assign(s, { name: j.name, sx: j.sx, sy: j.sy, sz: j.sz, pal: j.pal, folder: j.folder, script: j.script, split: j.split, tile: j.tile, walls: j.walls, hot: j.hot, hi: j.hi, loots: j.loots || [] });
+      s.cur = s.hot[s.hi] || s.hot[0];
+      s.pmap = new Map(s.pal.map((p, i) => [p, i]));
+      s.grid = unrle(j.g, s.sx * s.sy * s.sz);
+      s.chests = new Map(j.chests);
+      return s;
+    } catch (e) {
+      return null;
+    }
+  }
+  function clearDraft() {
+    try {
+      localStorage.removeItem(DKEY());
+    } catch (e) {
+    }
+  }
   function open() {
+    if (!window.FD_PAGE_MODE && typeof state !== "undefined" && state && state.id) {
+      const go = () => {
+        location.href = "/structures/?id=" + encodeURIComponent(state.id);
+      };
+      saveState().then(go, go);
+      return;
+    }
+    let dr = null;
     if (DRAFT) {
       S = DRAFT;
+      toast(T("Draft restored"));
+    } else if (window.FD_PAGE_MODE && (dr = loadDraft())) {
+      S = dr;
       toast(T("Draft restored"));
     } else {
       S = newState();
@@ -901,6 +976,10 @@
     DRAFT = countBlocks() ? S : null;
     unbind();
     closeModal();
+    if (window.FD_PAGE_MODE) {
+      window.FD_PAGE_BACK();
+      return;
+    }
     if (back) showToolboxModal();
   }
   function build() {
@@ -913,7 +992,9 @@
   <button class="st-chip" id="stSize" title="${T("Resize structure")}"><b id="stSizeTxt"></b></button>
   <span class="st-stat" id="stStat"></span>
   <span class="st-sp"></span>
+  <button class="st-btn st-v3" id="stView3" title="${T("Toggle 2D / 3D view")} (V)">${ico("eye", 18)}<b id="stView3Lbl">3D</b></button>
   <button class="st-ib" id="stUndo" title="${T("Undo")} (Ctrl+Z)">${ico("undo")}</button><button class="st-ib" id="stRedo" title="${T("Redo")} (Ctrl+Y)">${ico("redo")}</button>
+  <button class="st-ib st-dots" id="stDots" title="${T("More")}">${ico("dots", 18)}</button>
   <div class="st-menuwrap"><button class="st-btn" id="stMenu">${ico("menu", 16)}<span>${T("Structure")}</span></button><div class="st-menu" id="stMenuList" hidden>
     <button data-m="resize">${T("Resize\u2026")}</button><button data-m="mx">${T("Mirror structure X")}</button><button data-m="mz">${T("Mirror structure Z")}</button><button data-m="rot">${T("Rotate 90\xB0")}</button>
     <button data-m="replace">${T("Replace block\u2026")}</button><button data-m="trim">${T("Trim to content")}</button><button data-m="clear" class="danger">${T("Clear everything")}</button></div></div>
@@ -928,11 +1009,11 @@
       <div class="st-zoom"><button class="st-ib" id="stZi" title="${T("Zoom in")}">${ico("plus", 16)}</button><button class="st-ib" id="stZo" title="${T("Zoom out")}">${ico("minus", 16)}</button><button class="st-ib" id="stFit" title="${T("Fit")}">${ico("fit", 16)}</button></div>
     </div>
     <div class="st-layerbar"><button class="st-ib" id="stLD">\u25C0</button><input type="range" id="stLayer" min="0" max="${S.sy - 1}" value="${S.layer}"><button class="st-ib" id="stLU">\u25B6</button><b id="stLayerLbl"></b></div>
-    <div class="st-hotwrap"><div class="st-hotbar" id="stHot"></div><span class="st-keys">${T("Shortcuts: B pencil \xB7 E eraser \xB7 G fill \xB7 L line \xB7 R rect \xB7 O ellipse \xB7 C sphere \xB7 M select \xB7 I picker \xB7 Space pan \xB7 1-9 hotbar \xB7 PgUp/PgDn layer")}</span></div>
+    <div class="st-hotwrap"><button class="st-btn st-sheetbtn" id="stSheetBtn">${ico("cube", 16)}<span>${T("Blocks")}</span></button><div class="st-hotbar" id="stHot"></div><span class="st-keys">${T("Shortcuts: B pencil \xB7 E eraser \xB7 G fill \xB7 L line \xB7 R rect \xB7 O ellipse \xB7 C sphere \xB7 M select \xB7 I picker \xB7 Space pan \xB7 1-9 hotbar \xB7 PgUp/PgDn layer")}</span></div>
   </section>
   <aside class="st-side" id="stSide" data-tab="${S.tab}">
     <div class="st-prev"><div class="st-prevbar"><b>${T("3D")}</b><label class="st-sw"><input type="checkbox" id="stCut"><span>${T("Cut at current layer")}</span></label><button class="st-ib sm" id="stRot" title="${T("Rotate view")}">${ico("rot", 16)}</button></div><canvas id="stPv" width="360" height="220"></canvas></div>
-    <div class="st-tabs" id="stTabs"><button data-tab="blocks">${T("Blocks")}</button><button data-tab="loot">${T("Loot")}<i id="stLootN"></i></button><button data-tab="prev" class="mob">${T("3D")}</button><button data-tab="export">${T("Export")}</button></div>
+    <div class="st-tabs" id="stTabs"><button class="st-ib st-sheetx" id="stSheetX" title="${T("Close")}">${ico("x", 16)}</button><button data-tab="blocks">${T("Blocks")}</button><button data-tab="loot">${T("Loot")}<i id="stLootN"></i></button><button data-tab="prev" class="mob">${T("3D")}</button><button data-tab="export">${T("Export")}</button></div>
     <div class="st-pan" data-pan="blocks" id="stPanBlocks"></div>
     <div class="st-pan" data-pan="loot" id="stPanLoot"></div>
     <div class="st-pan" data-pan="export" id="stPanExport"></div>
@@ -942,7 +1023,12 @@
     cv = $("#stCv");
     pvc = $("#stPv");
     ctx = cv.getContext("2d");
-    redrawHook = () => reqDraw();
+    root.dataset.view = S.mode3 ? "3d" : "2d";
+    root.dataset.sheet = "0";
+    redrawHook = () => {
+      reqDraw();
+      if (window.FD_S3) FD_S3.redraw();
+    };
     wire();
     renderBlocks();
     renderHot();
@@ -954,6 +1040,45 @@
     updateTools();
     fitView();
     changed(true);
+    (window.FD_STRUCT_HOOKS || []).forEach((f) => f(API));
+    syncViewBtn();
+  }
+  function syncViewBtn() {
+    const l = $("#stView3Lbl");
+    if (l) l.textContent = S.mode3 ? "2D" : "3D";
+    if (root) root.dataset.view = S.mode3 ? "3d" : "2d";
+  }
+  function toggleView() {
+    S.mode3 = !S.mode3;
+    syncViewBtn();
+    if (window.FD_S3) FD_S3.show(S.mode3);
+    if (!S.mode3) {
+      reqDraw();
+      fitView();
+    }
+  }
+  function moreSheet() {
+    const items = [["rename", "Rename structure"], ["resize", "Resize\u2026"], ["mx", "Mirror structure X"], ["mz", "Mirror structure Z"], ["rot", "Rotate 90\xB0"], ["replace", "Replace block\u2026"], ["trim", "Trim to content"], ["loot", "Loot"], ["export", "Export"], ["clear", "Clear everything"], ["create", "Create structure"]];
+    popDialog(`<div class="st-dh"><b>${T("Structure")}</b></div><div class="st-more">${items.map((m) => `<button class="st-btn${m[0] === "create" ? " primary" : ""}${m[0] === "clear" ? " danger" : ""}" data-more="${m[0]}">${T(m[1])}</button>`).join("")}</div>`, () => true);
+  }
+  function moreClick(e) {
+      const b = e.target.closest("[data-more]");
+      if (!b) return;
+      const m = b.dataset.more;
+      $("#stPop").hidden = true;
+      $("#stPop").innerHTML = "";
+      if (m === "rename") {
+        const n = prompt(T("Structure name"), S.name);
+        if (n !== null && n.trim()) {
+          S.name = n.trim();
+          $("#stName").value = S.name;
+          renderExport();
+        }
+      } else if (m === "create") create();
+      else if (m === "loot" || m === "export") {
+        setTab(m);
+        root.dataset.sheet = "1";
+      } else $("#stMenuList").querySelector('[data-m="' + m + '"]').click();
   }
   function setTab(t) {
     S.tab = t;
@@ -1100,6 +1225,8 @@
   }
   function changed(imm) {
     reqDraw();
+    if (window.FD_S3) FD_S3.redraw();
+    if (window.FD_PAGE_MODE) saveDraftSoon();
     clearTimeout(statQ);
     statQ = setTimeout(() => {
       if (!root) return;
@@ -2116,6 +2243,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
 `;
   }
   function done(name, report, multi) {
+    clearDraft();
     const cmd = (t) => `<div class="st-cmd"><code>${esc(t)}</code><button class="st-btn sm" data-copy="${esc(t)}">${T("Copy")}</button></div>`;
     const tick = "/tickingarea add ~ ~ ~ ~" + Math.min(S.sx, 400) + " ~" + Math.min(S.sy, 320) + " ~" + Math.min(S.sz, 400);
     $("#stPop").hidden = false;
@@ -2144,6 +2272,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         DRAFT = null;
         unbind();
         closeModal();
+        if (window.FD_PAGE_MODE) window.FD_PAGE_BACK();
       }
     };
   }
@@ -2239,6 +2368,15 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
     $("#stName").onchange = renderExport;
     $("#stGo").onclick = create;
     $("#stSize").onclick = resizeDialog;
+    $("#stView3").onclick = toggleView;
+    $("#stPop").addEventListener("click", moreClick);
+    $("#stDots").onclick = moreSheet;
+    $("#stSheetBtn").onclick = () => {
+      root.dataset.sheet = root.dataset.sheet === "1" ? "0" : "1";
+    };
+    $("#stSheetX").onclick = () => {
+      root.dataset.sheet = "0";
+    };
     $("#stUndo").onclick = doUndo;
     $("#stRedo").onclick = doRedo;
     $("#stZi").onclick = () => zoomAt(1.4, cv.clientWidth / 2, cv.clientHeight / 2);
@@ -2249,6 +2387,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
       $("#stLayer").value = S.layer;
       reqDraw();
       if (S.cut) drawIso();
+      if (window.FD_S3) FD_S3.redraw();
     };
     $("#stLayer").oninput = (e) => setLayer(+e.target.value);
     $("#stLD").onclick = () => setLayer(S.layer - 1);
@@ -2256,6 +2395,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
     $("#stCut").onchange = (e) => {
       S.cut = e.target.checked;
       drawIso();
+      if (window.FD_S3) FD_S3.redraw();
     };
     $("#stRot").onclick = () => {
       S.rot = (S.rot + 1) % 4;
@@ -2373,6 +2513,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
       const s = e.target.closest(".st-slot[data-pick]");
       if (s) {
         setCur(s.dataset.id);
+        if (window.matchMedia("(max-width: 860px)").matches && !S.states) root.dataset.sheet = "0";
         return;
       }
       if (e.target.closest("#stCustomGo")) {
@@ -2496,6 +2637,10 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         renderProps();
         return;
       }
+      if (k === "v") {
+        toggleView();
+        return;
+      }
       const map = { b: "pencil", e: "eraser", g: "fill", l: "line", r: "rect", o: "ellipse", c: "sphere", m: "select", i: "pick", k: "container", h: "pan" };
       if (map[k]) {
         S.tool = map[k];
@@ -2526,6 +2671,12 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
     document.addEventListener("keydown", keyH, true);
     document.addEventListener("keyup", keyH, true);
   }
+  const API = { get S() {
+    return S;
+  }, get root() {
+    return root;
+  }, place, setB, beginOp, endOp, afterEdit, changed, tx, rgbOf, baseOf, gi, inb, palIdx, setCur, bbox, toast, doUndo, doRedo };
+  window.FD_STRUCT_API = API;
   window.FD_STRUCT = { buildPiece, NB, D: () => D, get state() {
     return S;
   }, _test: { palIdx: (s) => palIdx(s), xfState } };

@@ -19,6 +19,39 @@
     hist.push(snapshot());
     if (hist.length > 80) hist.shift();
     hi = hist.length - 1;
+    saveDraft();
+  }
+  const PAGE = () => !!window.FD_PAGE_MODE;
+  const dkey = () => "fd_hud_draft_" + (typeof state !== "undefined" && state && state.id ? state.id : "x");
+  function saveDraft() {
+    if (!PAGE()) return;
+    try {
+      localStorage.setItem(dkey(), JSON.stringify({ els: S.els, ns: S.ns, device: S.device, gui: S.gui, snap: S.snap, vis: S.vis, key: S.key, hud: S.hud, rp: S.rp, uidn }));
+    } catch (e) {
+    }
+  }
+  function loadDraft() {
+    try {
+      const d = JSON.parse(localStorage.getItem(dkey()) || "null");
+      if (d && Array.isArray(d.els)) {
+        Object.assign(S, { els: d.els, ns: d.ns || S.ns, device: d.device || S.device, gui: d.gui || S.gui, snap: d.snap == null ? S.snap : d.snap, vis: d.vis || S.vis, key: d.key || S.key, hud: d.hud !== false, rp: d.rp || S.rp });
+        if (d.uidn) uidn = Math.max(uidn, d.uidn);
+        return true;
+      }
+    } catch (e) {
+    }
+    return false;
+  }
+  function clearDraft() {
+    try {
+      localStorage.removeItem(dkey());
+    } catch (e) {
+    }
+  }
+  function leave() {
+    closeModal();
+    if (PAGE()) window.FD_PAGE_BACK();
+    else showToolboxModal();
   }
   function undo() {
     if (hi > 0) {
@@ -216,6 +249,11 @@
     });
   }
   function open(keep) {
+    if (!PAGE() && typeof state !== "undefined" && state && state.id) {
+      location.href = "/ui/?id=" + encodeURIComponent(state.id);
+      return;
+    }
+    if (PAGE() && !keep && !hist.length) loadDraft();
     if (!keep) {
       step = "edit";
       if (!hist.length) {
@@ -224,7 +262,7 @@
       if (!S.rp) S.rp = defaultRP();
     }
     if (!S.rp) S.rp = defaultRP();
-    showModal('<div class="modal fdh-modal" id="fdhRoot"></div>', () => refresh());
+    showModal('<div class="modal fdh-modal' + (PAGE() ? " fdh-page" : "") + '" id="fdhRoot"></div>', () => refresh());
   }
   function pathOf(node, root, pre) {
     root = root || state.root;
@@ -262,6 +300,7 @@
     dup: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
     del: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
     up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 15 6-6 6 6"/></svg>',
+    dots: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
     down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>'
   };
   const typeIcon = (t) => t === "image" ? IC.img : t === "label" ? IC.txt : IC.pan;
@@ -272,6 +311,7 @@
   <button class="fdh-b" data-add="image">${IC.img}<span>Image</span></button><button class="fdh-b" data-add="label">${IC.txt}<span>Text</span></button><button class="fdh-b" data-add="panel">${IC.pan}<span>Panel</span></button>
   <span class="fdh-sep"></span>
   <button class="fdh-b ico" id="fdhUndo" title="Undo"${hi > 0 ? "" : " disabled"}>${IC.undo}</button><button class="fdh-b ico" id="fdhRedo" title="Redo"${hi < hist.length - 1 ? "" : " disabled"}>${IC.redo}</button>
+  <button class="fdh-b ico fdh-dots" id="fdhDots" title="More options">${IC.dots}</button>
   <span class="fdh-sep"></span>
   <select id="fdhDev" title="Screen preset">${Object.keys(DEVICES).map((k) => `<option value="${k}"${S.device === k ? " selected" : ""}>${DEVICES[k][0]}</option>`).join("")}</select>
   <select id="fdhGui" title="GUI scale">${[1, 2, 3, 4].map((n) => `<option value="${n}"${S.gui === n ? " selected" : ""}>GUI scale ${n}</option>`).join("")}</select>
@@ -333,7 +373,7 @@ ${fld("Visibility", `<select id="fdhVis"><option value="always"${S.vis === "alwa
     const wrap = document.getElementById("fdhWrap"), scaler = document.getElementById("fdhScaler"), stage = document.getElementById("fdhStage"), els = document.getElementById("fdhEls");
     if (!stage) return;
     const [W, H] = logical();
-    const avail = Math.max(200, wrap.clientWidth - 2), maxH = window.innerWidth < 800 ? 300 : Math.max(240, window.innerHeight * 0.56);
+    const avail = Math.max(200, wrap.clientWidth - 2), maxH = PAGE() ? Math.max(140, wrap.clientHeight - 36) : window.innerWidth < 800 ? 300 : Math.max(240, window.innerHeight * 0.56);
     const k = Math.min(avail / W, maxH / H);
     stage._k = k;
     scaler.style.width = Math.round(W * k) + "px";
@@ -553,10 +593,8 @@ ${fld("Visibility", `<select id="fdhVis"><option value="always"${S.vis === "alwa
     refresh();
   }
   function wireEdit(root) {
-    root.querySelector("#fdhBack").onclick = () => {
-      closeModal();
-      showToolboxModal();
-    };
+    root.querySelector("#fdhBack").onclick = leave;
+    root.querySelector("#fdhDots").onclick = () => moreDialog(root);
     root.querySelectorAll("[data-add]").forEach((b) => b.onclick = () => {
       const t = b.dataset.add;
       const e = addEl(t);
@@ -596,7 +634,9 @@ ${fld("Visibility", `<select id="fdhVis"><option value="always"${S.vis === "alwa
       renderStage();
     };
     root.querySelectorAll("[data-tab]").forEach((b) => b.onclick = () => {
+      const same = S.tab === b.dataset.tab;
       S.tab = b.dataset.tab;
+      if (PAGE()) root.dataset.sheet = same && root.dataset.sheet === "1" ? "0" : "1";
       refresh();
     });
     const stage = root.querySelector("#fdhStage");
@@ -788,6 +828,63 @@ ${fld("Visibility", `<select id="fdhVis"><option value="always"${S.vis === "alwa
 <h4>Notes (unverified)</h4><ul class="fdh-notes">${r.notes.concat(r.warnings).map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div></div>
 <div class="modal-actions"><button class="btn btn-ghost" id="fdhEdit">Back to the editor</button><button class="btn btn-primary" id="fdhClose">Close</button></div>`;
   }
+  function moreDialog(root) {
+    const old = root.querySelector("#fdhPop");
+    if (old) old.remove();
+    const T = (x) => window.FD_I18N && FD_I18N.t ? FD_I18N.t(x) : x;
+    const pop = document.createElement("div");
+    pop.id = "fdhPop";
+    pop.className = "fdh-pop";
+    const opt = (id, arr, cur, f) => `<label class="fdh-pf"><span>${T(id)}</span><select data-ctl="${id}">${arr.map((a) => `<option value="${a[0]}"${String(a[0]) === String(cur) ? " selected" : ""}>${f ? f(a) : a[1]}</option>`).join("")}</select></label>`;
+    pop.innerHTML = `<div class="fdh-dlg"><div class="fdh-dh"><b>${T("More options")}</b><button class="fdh-b ico" data-x="1">\u2715</button></div>
+<div class="fdh-dbody">
+<div class="fdh-grid"><button class="fdh-b" data-m="undo"${hi > 0 ? "" : " disabled"}>${IC.undo}<span>${T("Undo")}</span></button><button class="fdh-b" data-m="redo"${hi < hist.length - 1 ? "" : " disabled"}>${IC.redo}<span>${T("Redo")}</span></button>
+<button class="fdh-b" data-m="rename"><span>${T("Rename")}</span></button><button class="fdh-b" data-m="clear"><span>${T("Clear all")}</span></button></div>
+${opt("Screen preset", Object.keys(DEVICES).map((k) => [k, DEVICES[k][0]]), S.device, (a) => T(a[1]))}
+${opt("GUI scale", [1, 2, 3, 4].map((n) => [n, n]), S.gui)}
+${opt("Snap to grid", [0, 2, 4, 8, 16].map((n) => [n, n ? n + " px" : T("No snap")]), S.snap)}
+<label class="fdh-chk"><input type="checkbox" data-chk="vanilla"${S.vanilla ? " checked" : ""}> ${T("Vanilla HUD")}</label>
+<label class="fdh-chk"><input type="checkbox" data-chk="safe"${S.safe ? " checked" : ""}> ${T("Safe area")}</label>
+<label class="fdh-chk"><input type="checkbox" data-chk="grid"${S.grid ? " checked" : ""}> ${T("Grid")}</label>
+<button class="btn btn-primary fdh-create" data-m="create">${T("Create in project")}</button></div></div>`;
+    root.appendChild(pop);
+    const close = () => pop.remove();
+    pop.onclick = (ev) => {
+      if (ev.target === pop || ev.target.closest("[data-x]")) return close();
+      const m = ev.target.closest("[data-m]");
+      if (!m || m.disabled) return;
+      const a = m.dataset.m;
+      if (a === "undo") undo();
+      else if (a === "redo") redo();
+      else if (a === "rename") {
+        const v = prompt(T("File / namespace"), S.ns);
+        if (v != null) S.ns = U.slug(v) || "my_hud";
+        S.tab = "export";
+        refresh();
+      } else if (a === "clear") {
+        if (S.els.length && confirm(T("Clear all") + "?")) {
+          S.els = [];
+          S.sel = null;
+          commit();
+          refresh();
+        }
+      } else if (a === "create") {
+        close();
+        generate();
+        return;
+      }
+      close();
+    };
+    pop.onchange = (ev) => {
+      const c = ev.target.dataset.ctl, k = ev.target.dataset.chk;
+      if (c === "Screen preset") S.device = ev.target.value;
+      else if (c === "GUI scale") S.gui = +ev.target.value;
+      else if (c === "Snap to grid") S.snap = +ev.target.value;
+      else if (k) S[k] = ev.target.checked;
+      saveDraft();
+      refresh();
+    };
+  }
   function wireDone(root) {
     root.querySelector("#fdhBack2").onclick = () => {
       step = "edit";
@@ -797,7 +894,10 @@ ${fld("Visibility", `<select id="fdhVis"><option value="always"${S.vis === "alwa
       step = "edit";
       refresh();
     };
-    root.querySelector("#fdhClose").onclick = closeModal;
+    root.querySelector("#fdhClose").onclick = () => {
+      clearDraft();
+      leave();
+    };
     root.querySelectorAll("[data-copy]").forEach((b) => b.onclick = () => {
       copyToClipboard(b.dataset.copy);
       showToast("Copied");
@@ -811,6 +911,10 @@ ${fld("Visibility", `<select id="fdhVis"><option value="always"${S.vis === "alwa
     onOpen: () => open(false)
   });
   if (window.FD_I18N) window.FD_I18N.add([
+    ["More options", "M\xE1s opciones"],
+    ["Rename", "Renombrar"],
+    ["Clear all", "Borrar todo"],
+    ["Create in project", "Crear en el proyecto"],
     ["HUD / UI Designer", "Dise\xF1ador de HUD / UI"],
     ["Design HUD overlays on a simulated Minecraft screen and export JSON UI.", "Dise\xF1a HUD sobre una pantalla simulada de Minecraft y exporta JSON UI."],
     ["Image", "Imagen"],

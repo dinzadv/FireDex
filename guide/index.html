@@ -3,5 +3,139 @@
 <title>Guía · FireDex</title><meta name="description" content="Guía de FireDex.">
 <link rel="icon" type="image/png" href="/img/logo-64.png"><link rel="apple-touch-icon" href="/img/logo-192.png">
 <link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="/css/pixel.css"><link rel="stylesheet" href="/css/app.css">
-<script src="/js/i18n.js"></script></head>
-<body class="px-page"><div id="root"></div><script src="/assets/icons.js"></script><script src="/assets/app.js"></script></body></html>
+<script src="/js/diag.js"></script><script src="/js/i18n.js"></script></head>
+<body class="px-page"><div id="root"><link rel="preload" as="image" href="/img/logo.png"/><canvas id="particles"></canvas><header class="px-top"><div class="px-wrap"><a href="/"><img src="/img/logo.png" alt="FireDex"/></a><b class="px" style="font-size:26px">FireDex</b><span class="sp"></span><a class="px-btn sm" href="/commands/">Comandos</a><a class="px-btn sm green" href="/guide/">Guía</a><button class="px-ib" title="Ajustes" aria-label="Ajustes"><svg class="pxi " data-px="sliders" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg></button></div></header><main class="px-wrap"><div class="doc">
+<p class="px-crumbs"><a href="/">Inicio</a> › Guía</p>
+<h1 class="px" style="font-size:44px;margin:0">Guía de FireDex</h1>
+<p class="gd-lead">Todo lo que necesitas para crear addons, modelos y animaciones de Minecraft Bedrock, y para entender cómo funciona FireDex por dentro.</p>
+<div class="px-card gd-toc"><h3>Contenido</h3><p>
+<a href="#inicio">1. Inicio rápido</a> · <a href="#proyectos">2. Proyectos y datos</a> · <a href="#addon">3. Estructura de un addon</a> · <a href="#editor">4. Editor de código</a> · <a href="#modelador">5. Modelador 3D</a> · <a href="#animaciones">6. Animaciones</a> · <a href="#integracion">7. Integración con el addon</a> · <a href="#atajos">8. Atajos</a> · <a href="#dev">9. Para desarrolladores</a> · <a href="#problemas">10. Problemas y límites</a> · <a href="#tools">11. Herramientas</a></p></div>
+
+<div class="px-card gd" id="inicio"><h3>1. Inicio rápido</h3>
+<p><b>Crear un addon:</b> en Inicio pulsa <b>Crear proyecto</b> o sube un .mcaddon/.mcpack/.zip. Se abre el <b>editor de código</b> con el árbol de archivos.</p>
+<p><b>Crear solo un modelo:</b> pulsa <b>Nuevo modelo 3D</b>. No necesitas un addon: FireDex crea un proyecto independiente con <code>models/entity</code>, <code>animations</code> y <code>textures/entity</code>. Cuando quieras, lo integras en un addon (sección 7).</p>
+<p><b>Todo se guarda en tu navegador</b> (IndexedDB). No se sube nada a ningún servidor. Exporta con el botón <b>Exportar</b> (zip / .mcaddon) para hacer copias de seguridad.</p></div>
+
+<div class="px-card gd" id="proyectos"><h3>2. Proyectos y datos</h3>
+<p>Cada proyecto es un árbol de carpetas y archivos guardado en la base <code>devstudio_db</code>: <code>projects_index</code> (lista con nombre y fecha) y <code>projects_data</code> (<code>{id, name, root, meta}</code>).</p>
+<code class="cmd">root: { id, type:"folder", kind?:"model", children:[ { id, type:"file", name, content } ... ] }</code>
+<p>• Los archivos de texto guardan su contenido como texto; las imágenes como <b>data URL</b>.<br>• <code>root.kind === "model"</code> marca un proyecto de modelo independiente: se abre directamente en el modelador.<br>• <code>meta</code> guarda datos auxiliares del modelador (colores de cubos, identificador de entidad).<br>• El proyecto activo se recuerda en <code>localStorage.devstudio_active_project</code>.</p>
+<p><b>Borrar los datos del navegador borra tus proyectos.</b> Exporta con frecuencia.</p></div>
+
+<div class="px-card gd" id="addon"><h3>3. Estructura de un addon</h3>
+<code class="cmd">MiAddon/
+├─ behavior_pack/
+│  ├─ manifest.json
+│  ├─ entities/      (*.json  — comportamiento)
+│  ├─ items/  blocks/  recipes/  loot_tables/
+│  ├─ functions/     (*.mcfunction)
+│  └─ scripts/       (Script API, *.js / *.ts)
+└─ resource_pack/
+   ├─ manifest.json
+   ├─ models/entity/     (*.geo.json  — geometrías)
+   ├─ animations/        (*.animation.json)
+   ├─ entity/            (*.entity.json — entidad cliente)
+   ├─ textures/entity/   (*.png)
+   └─ texts/en_US.lang  pack_icon.png</code>
+<p>• Usa un namespace propio: <b>mi:espada</b>, nunca <b>minecraft:</b>.<br>• Cada pack necesita UUID únicos (usa el generador de <a href="/manifest/">Manifest</a>).<br>• La <b>entidad de comportamiento</b> (BP) define qué es y qué hace; la <b>entidad cliente</b> (RP) define cómo se ve: modelo, textura y animaciones.</p></div>
+
+<div class="px-card gd" id="editor"><h3>4. Editor de código</h3>
+<p><b>Árbol de archivos:</b> iconos por tipo (JS, TS, JSON, mcfunction, lang, imágenes…), crear, renombrar, duplicar, mover, borrar (con aviso para deshacer), subir archivos y carpetas completas, buscar por nombre.</p>
+<p><b>Edición:</b> resaltado de sintaxis propio, números de línea, autocierre de paréntesis y comillas, sangrado automático, comentar (<kbd>Ctrl</kbd>+<kbd>/</kbd>), mover líneas (<kbd>Alt</kbd>+<kbd>↑/↓</kbd>), buscar y reemplazar (<kbd>Ctrl</kbd>+<kbd>F</kbd>), formatear JSON, pestañas que se recuerdan.</p>
+<p><b>Historial:</b> deshacer/rehacer con agrupación de escritura, y flechas Atrás/Adelante para volver a la posición anterior del cursor. En el árbol, borrar o mover muestra un aviso con «Deshacer».</p>
+<p><b>Sugerencias de Minecraft:</b> al escribir en JavaScript o TypeScript aparece una lista con clases, métodos, propiedades, eventos (<code>world.afterEvents.…</code>), componentes y plantillas. Deduce el tipo por el nombre de la variable, anotaciones TS, <code>const x = cadena…</code> y <code>for…of</code>. Elegir una clase sin importar ofrece <b>importar automáticamente</b> desde <code>@minecraft/server</code> / <code>@minecraft/server-ui</code>. En archivos <code>.mcfunction</code> sugiere comandos.</p>
+<p><b>Detección de errores:</b> <span class="gd-r">rojo</span> = error que rompe (sintaxis, JSON inválido, manifest incorrecto); <span class="gd-y">amarillo</span> = posible problema (evento desconocido, variable sin usar, UUID repetido, versión rara); <span class="gd-b">azul</span> = sugerencia. Pulsa el subrayado para ver el motivo y el arreglo rápido. En TypeScript se revisa estructura y paréntesis, <b>no</b> los tipos.</p>
+<p><b>Móvil:</b> barra de teclas extra (Tab, llaves, flechas, deshacer), el teclado no tapa el cursor, lista de sugerencias sobre el teclado y panel de archivos deslizable.</p>
+<p><b>Modelos:</b> al abrir un <code>.geo.json</code> o <code>.animation.json</code> aparece el botón <b>Modelo</b> que lo abre en el modelador.</p></div>
+
+<div class="px-card gd" id="modelador"><h3>5. Modelador 3D</h3>
+<p>Editor de geometrías Bedrock (<code>*.geo.json</code>, formatos 1.12 y antiguo 1.8) con visor WebGL propio: no necesita internet ni librerías externas.</p>
+<h4>Modos (arriba)</h4>
+<p><b>Modelar</b> (1) · <b>Mapeo</b> UV (2) · <b>Pintar</b> (3) · <b>Animar</b> (4).</p>
+<h4>Modelar</h4>
+<p>• <b>Esquema</b>: huesos (naranja) con sus cubos (con color propio), mostrar/ocultar y plegar.<br>• <b>Herramientas</b>: Elegir, Mover, Rotar y Tamaño con ejes sobre el modelo; añadir cubo/hueso, duplicar, borrar.<br>• <b>Más herramientas</b>: espejo en X, centrar pivote, agrupar en hueso, rotar cubo 90°, dividir cubo, alinear al suelo, centrar modelo, ajustar a enteros, escalar todo el modelo, mostrar/ocultar todo.<br>• <b>Propiedades</b>: origen, tamaño, pivote, rotación, inflate, espejo UV, color y hueso padre. Los huesos tienen nombre, padre, pivote y rotación.<br>• <b>Teclado</b>: flechas y RePág/AvPág mueven la selección según el <b>Ajuste</b> (1, 0.5, 0.25 o libre).<br>• <b>Vista</b>: perspectiva/ortogonal, malla, cuadrícula, sombreado y modo textura/color (menú ⋮).</p>
+<h4>Cómo funciona un modelo Bedrock</h4>
+<p>Un modelo es una lista de <b>huesos</b>; cada hueso tiene <code>pivot</code>, <code>rotation</code>, un <code>parent</code> opcional y <code>cubes</code>. Un cubo tiene <code>origin</code> (esquina mínima), <code>size</code>, <code>uv</code>, y opcionalmente <code>pivot</code>, <code>rotation</code>, <code>inflate</code>, <code>mirror</code>. Las unidades son píxeles (16 = 1 bloque). El hueso hijo hereda la transformación del padre.</p>
+<code class="cmd">{ "format_version": "1.12.0",
+  "minecraft:geometry": [{
+    "description": { "identifier": "geometry.zombi", "texture_width": 64, "texture_height": 64 },
+    "bones": [ { "name": "body", "pivot": [0,12,0],
+      "cubes": [ { "origin": [-4,12,-2], "size": [8,12,4], "uv": [16,16] } ] } ] }] }</code>
+<h4>UV y texturas</h4>
+<p>• <b>UV de caja</b> (<code>"uv": [u, v]</code>): la textura se despliega automáticamente desde (u, v) en forma de cruz (este, norte, oeste, sur, arriba, abajo).<br>• <b>UV por caras</b> (<code>"uv": { "north": { "uv": [..], "uv_size": [..] } }</code>): cada cara se coloca libremente.<br>• En <b>Mapeo</b> arrastra las caras sobre la textura: el modelo se actualiza <b>en tiempo real</b>. <b>Auto UV</b> reorganiza todo, <b>Píxel</b> redondea a enteros, <b>Caras</b> pasa un cubo a UV por caras.<br>• En <b>Pintar</b> usa lápiz, borrador, relleno y cuentagotas directamente sobre el modelo 3D o sobre el mapa. La textura se toma de un .png del proyecto (se busca por nombre) o puedes cargar/crear una.<br>• El tamaño de textura (<code>texture_width/height</code>) se cambia sin seleccionar nada.</p>
+<h4>Guardado, historial y borrador</h4>
+<p>• <b>Los cambios NO se guardan solos en el proyecto.</b> Pulsa <b>Guardar</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>); el botón se ilumina cuando hay cambios pendientes.<br>• Para que un error no te haga perder trabajo, FireDex guarda un <b>borrador de seguridad</b> aparte; si cierras sin guardar, al volver te pregunta si quieres recuperarlo.<br>• El botón <b>Historial</b> lista cada cambio con su nombre y hora: pulsa uno para volver (o avanzar) a ese punto. Deshacer/rehacer cubre geometría, colores, textura y animaciones.</p>
+<p>Los colores de los cubos son solo visuales (se guardan en los datos del proyecto, no en el .geo.json, para no romper el archivo del juego).</p></div>
+
+<div class="px-card gd" id="animaciones"><h3>6. Animaciones</h3>
+<p>El modo <b>Animar</b> edita archivos <code>*.animation.json</code>. FireDex <b>busca el archivo automáticamente</b> (por nombre o por contener animaciones del modelo). Si no lo encuentra, aparece «Sin archivo»: púlsalo para elegir uno, <b>crear</b> <code>animations/nombre.animation.json</code> o <b>importar</b> uno de tu equipo.</p>
+<code class="cmd">{ "format_version": "1.8.0",
+  "animations": { "animation.zombi.walk": {
+      "loop": true, "animation_length": 1,
+      "bones": { "leftarm": {
+          "rotation": { "0.0": [0,0,0], "0.5": [40,0,0], "1.0": [0,0,0] } } } } } }</code>
+<p><b>Canales:</b> <span class="gd-b">posición</span>, <span class="gd-r">rotación</span> y <span class="gd-y">escala</span> por hueso. Entre dos claves se interpola de forma lineal. Las claves con Molang se conservan pero se editan en el JSON.</p>
+<p><b>Cómo animar:</b> 1) crea o elige una animación (+) · 2) elige un hueso · 3) mueve el cursor de tiempo · 4) usa Mover / Rotar / Escala sobre el modelo, o escribe valores en el panel «Pose». Cada cambio crea o actualiza una <b>clave</b> en ese instante.</p>
+<p><b>Línea de tiempo:</b> arrastra la regla para recorrer el tiempo; arrastra un rombo para mover su clave; <kbd>Supr</kbd> borra la clave seleccionada; <kbd>Ctrl</kbd>+rueda hace zoom. Controles: reproducir/detener, duración, repetición (bucle, una vez, mantener al final), duplicar y renombrar.</p>
+<p><b>Guardado:</b> igual que el modelo, se guarda al pulsar <b>Guardar</b>. Los identificadores deben ser <code>animation.&lt;modelo&gt;.&lt;nombre&gt;</code>.</p></div>
+
+<div class="px-card gd" id="integracion"><h3>7. Integración con el addon</h3>
+<p>Pulsa el botón de enlace (🔗) del modelador. FireDex detecta y muestra: geometría, textura (ruta de recurso), archivo de animaciones y si existe una entidad cliente que use el modelo.</p>
+<p>• <b>Crear / actualizar entidad cliente</b>: escribe <code>entity/&lt;nombre&gt;.entity.json</code> en el resource pack con la geometría, la textura y todas las animaciones (y reproduce <i>idle</i> automáticamente si existe). Si ya hay una con ese identificador, solo la actualiza.<br>• <b>Crear entidad (Behavior Pack)</b>: genera <code>entities/&lt;nombre&gt;.json</code> mínima en tu BP.<br>• <b>Copiar a otro proyecto</b>: pone modelo, textura, animaciones y entidad en el resource pack del addon que elijas.<br>• <b>Exportar .mcpack</b>: resource pack listo para importar en Minecraft.</p>
+<p><b>Dónde van las animaciones:</b> en el resource pack, <code>animations/*.animation.json</code>. Si FireDex no las encuentra, defínelas con «Definir» en la ventana de integración o desde la línea de tiempo.</p>
+<h4>Ejecutar una animación en el juego</h4>
+<code class="cmd">/summon fd:zombi
+/playanimation @e[type=fd:zombi] animation.zombi.walk</code>
+<code class="cmd">import { world } from "@minecraft/server";
+for (const e of world.getDimension("overworld").getEntities({ type: "fd:zombi" })) {
+  e.playAnimation("animation.zombi.walk");
+}</code>
+<p>También puedes enlazarla en la entidad cliente: <code>"animations": {"walk": "animation.zombi.walk"}</code> y <code>"scripts": {"animate": ["walk"]}</code>. Activa los «Experimentos» de la versión si tu versión de Minecraft los requiere.</p></div>
+
+<div class="px-card gd" id="atajos"><h3>8. Atajos</h3>
+<table class="gd-t"><tr><th>Editor de código</th><th></th></tr>
+<tr><td>Guardar</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td></tr><tr><td>Deshacer / Rehacer</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td></tr><tr><td>Buscar</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd></td></tr><tr><td>Comentar</td><td><kbd>Ctrl</kbd>+<kbd>/</kbd></td></tr>
+<tr><th>Modelador</th><th></th></tr>
+<tr><td>Modo</td><td><kbd>1</kbd> Modelar · <kbd>2</kbd> Mapeo · <kbd>3</kbd> Pintar · <kbd>4</kbd> Animar</td></tr>
+<tr><td>Herramientas</td><td><kbd>V</kbd> elegir · <kbd>G</kbd> mover · <kbd>R</kbd> rotar · <kbd>S</kbd> tamaño</td></tr>
+<tr><td>Pintura</td><td><kbd>B</kbd> lápiz · <kbd>E</kbd> borrador · <kbd>F</kbd> relleno · <kbd>I</kbd> gotero</td></tr>
+<tr><td>Duplicar / Borrar</td><td><kbd>Ctrl</kbd>+<kbd>D</kbd> / <kbd>Supr</kbd></td></tr>
+<tr><td>Vista</td><td>Clic derecho: girar o mover · Rueda: zoom · <kbd>F</kbd>: encuadrar</td></tr>
+<tr><td>Animación</td><td><kbd>Espacio</kbd> reproducir · <kbd>K</kbd> clave · <kbd>←/→</kbd> ±0.05 s</td></tr></table>
+<p>En móvil: un dedo gira, dos dedos hacen zoom y mueven la vista (en pintura, un dedo pinta).</p></div>
+
+<div class="px-card gd" id="dev"><h3>9. Para desarrolladores</h3>
+<p>FireDex es un sitio estático para GitHub Pages: las páginas del sitio están hechas con React y se compilan con <code>node build.mjs</code> a <code>assets/app.js</code>. Antes: <code>node build.js</code> generaba <code>index.html</code>, <code>commands.html</code>, <code>guide.html</code> y <code>manifest.html</code>; el editor (<code>edit/index.html</code>, ruta <code>/edit/</code>) y el modelador (<code>model/index.html</code>, ruta <code>/model/</code>) son páginas escritas a mano. Las rutas son limpias (<code>/guide/</code>, <code>/terms/</code>…): cada una es una carpeta con su <code>index.html</code>, así que el sitio debe servirse desde la raíz del dominio.</p>
+<code class="cmd">js/main.js         menú principal, proyectos, wizard, creación de modelos
+js/co.js           datos del editor: IndexedDB, árbol, modales, exportar
+js/co-ui.js        Toolbox y utilidades de interfaz
+js/mcdata.js       datos de la API de Minecraft (clases, eventos, componentes, snippets)
+js/editor-core.js  tokenizador, linter, autocompletado, JSON/manifest  (window.EC)
+js/editor-view.js  motor del editor: textarea + resaltado, historial, búsqueda, móvil
+js/model.js        modelador: WebGL, huesos/cubos, UV, pintura, historial, guardado
+js/model-anim.js   animaciones: claves, línea de tiempo, pose
+js/model-int.js    integración: entidad cliente, copiar, .mcpack
+css/*.css          pixel.css (menú), editor.css, model.css</code>
+<h4>Editor</h4>
+<p>Un <code>&lt;textarea&gt;</code> transparente sobre un <code>&lt;pre&gt;</code> resaltado comparten un contenedor de scroll. El cursor y el menú de sugerencias se posicionan con métricas monoespaciadas. <code>EC.tokenize/render</code> colorea, <code>EC.lint</code> devuelve diagnósticos <code>{from, to, sev, msg, fix}</code> y <code>EC.suggest</code> las sugerencias. Para añadir clases o eventos de la API edita <code>mcdata.js</code> (<code>TYPES</code>, <code>EVENTS</code>, <code>IMPORTS</code>).</p>
+<h4>Modelador</h4>
+<p>El estado vive en <code>S</code>; el JSON del archivo (<code>S.root</code>) es la fuente de verdad. <code>rebuild()</code> recorre huesos y cubos, calcula matrices (<code>boneMatrix</code>) y genera las caras (<code>faces</code>) y el buffer WebGL. <code>commit(etiqueta)</code> guarda un paso de historial, reconstruye y marca cambios. Todo se expone en <code>window.FD</code>.</p>
+<p><b>Ganchos</b> (<code>FD.hooks</code>): <code>snap</code> y <code>restore</code> (historial), <code>save</code> (guardado y borrador), <code>init</code>, <code>refresh</code>. Así <code>model-anim.js</code> añade sus datos al historial sin tocar el núcleo. <code>FD.pose(hueso)</code> devuelve la pose animada de un hueso o <code>null</code>.</p>
+<p><b>Añadir una herramienta:</b> escribe una función que modifique <code>S.root</code> y termine con <code>commit('Nombre')</code>; añádela a la lista <code>MORE</code> en <code>model.js</code>.</p>
+<p><b>Añadir un tipo de archivo al editor:</b> registra la extensión en <code>EC.LANGS</code> (<code>editor-core.js</code>) y su icono en <code>fileMeta</code> (<code>co.js</code>).</p>
+<p><b>Datos:</b> los proyectos están en IndexedDB (sección 2). El guardado del modelador reescribe <code>projects_data</code> completo; no hay servidor.</p></div>
+
+<div class="px-card gd" id="problemas"><h3>10. Problemas y límites</h3>
+<p>• <b>El visor no se ve:</b> el navegador necesita WebGL (activa la aceleración por hardware).<br>• <b>Perdí cambios:</b> reabre el modelador; si hay borrador te lo ofrecerá. Los borradores se guardan en el navegador.<br>• <b>Las rotaciones se ven distintas en el juego:</b> el modelador aplica rotaciones directas en el sistema de coordenadas del archivo; verifica los modelos con rotaciones en Minecraft.<br>• <b>Animaciones:</b> solo interpolación lineal (no Catmull-Rom/bezier) y sin Molang editable; no hay animaciones de controladores.<br>• <b>No incluido:</b> selección múltiple, importar .bbmodel de Blockbench, modelos de Java, texturas animadas.<br>• <b>TypeScript:</b> se comprueba la estructura, no los tipos.<br>• Los proyectos viven en este navegador y este dispositivo: exporta para moverlos.</p></div>
+<div class="px-card gd" id="tools"><h3>11. Herramientas del Toolbox</h3>
+<p>En el editor abre el <b>Toolbox</b> (barra inferior). Todas las herramientas escriben archivos directamente en tu proyecto y te dejan elegir la carpeta de destino.</p>
+<p><b>Animator:</b> pantalla completa sobre un fondo de Survival oscurecido: junta varias imágenes (o un GIF, o un spritesheet) en una animación que se reproduce sobre toda la pantalla del juego (JSON UI), como póster en el mundo o como bloque animado; con una sola imagen puedes aplicar un efecto (fundido, pulso, rebote, giro, desplazamiento…). Genera la hoja de fotogramas, el modelo, la entidad (RP y BP), el render controller y un script <code>fd_img.js</code> con el manifest actualizado. En el juego: <code>/scriptevent fd:img nombre</code> o <code>/summon fd:img_nombre</code>. También puede crear un <b>bloque animado</b> (flipbook).</p>
+<p><b>Imágenes:</b> importa imágenes sueltas a cualquier carpeta del proyecto.</p>
+<p><b>Texturas:</b> editor pixel-art con las texturas de bloques de Minecraft (descargadas del repositorio oficial Mojang/bedrock-samples). Guarda con el mismo nombre para reemplazar un bloque vanilla, o con otro nombre para una textura nueva.</p>
+<p><b>Bloques:</b> crea bloques personalizados (texturas por cara, luz, dureza, fricción, inflamable…) y los registra en BP, RP, terrain_texture.json y el archivo de idioma.</p>
+<p><b>Estructuras:</b> construye por capas con bloques de Minecraft y guarda un archivo <code>.mcstructure</code> real. Cárgala con <code>/structure load nombre ~ ~ ~</code>.</p>
+<p><b>HUD / Interfaz:</b> diseña pantallas simuladas del juego (imágenes, textos, paneles) y exporta JSON UI listo para el resource pack (<code>ui/</code>, <code>_ui_defs.json</code>, <code>hud_screen.json</code>).</p>
+<p><b>Manifest → Actualizar:</b> cuando salga una versión nueva, ve a Manifest, pulsa «Buscar últimas versiones», elige tu addon y actualiza (o descarga el manifest.json nuevo).</p>
+</div>
+<div class="px-grid"><a class="px-card" href="/manifest/"><h3>Generar manifest</h3><p>UUID listos para usar.</p></a><a class="px-card" href="/commands/"><h3>Ver comandos</h3><p>Prueba tu addon con /summon, /event y /function.</p></a></div>
+</div></main><footer class="px-foot"><div class="px-wrap"><div class="px-foot-in"><span>© <!-- -->2026<!-- --> <!-- -->FireDex<!-- --> · Herramienta independiente, no afiliada a Mojang ni a Microsoft.</span><nav><a href="/terms/">Términos</a><a href="/privacy/">Privacidad</a><a href="/cookies/">Cookies</a><a href="/legal/">Aviso legal</a></nav></div></div></footer><nav class="px-nav"><a href="/" class=""><svg class="pxi " data-px="home" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5M5.5 10v9h13v-9"/></svg>Inicio</a><a href="/commands/" class=""><svg class="pxi " data-px="terminal" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4zM7 9l3 3-3 3M12 15h5"/></svg>Comandos</a><a class="plus" href="/#crear" title="Crear proyecto">+</a><a href="/manifest/" class=""><svg class="pxi " data-px="clipboard" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM9 12h7M9 16h7"/></svg>Manifest</a><a href="/guide/" class="on"><svg class="pxi " data-px="book-open" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v18H6.5A2.5 2.5 0 0 1 4 18.5zM20 5.5A2.5 2.5 0 0 0 17.5 3H12v18h5.5a2.5 2.5 0 0 0 2.5-2.5z"/></svg>Guía</a></nav></div><script src="/assets/icons.js"></script><script src="/assets/app.js"></script></body></html>

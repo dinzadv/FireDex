@@ -1,13 +1,11 @@
 import React, { memo } from 'react';
+import { FB, FILE } from '../icons/data.js';
 
 export const Px = memo(function Px({ name, size = 20, className = '' }) {
-  const I = window.FD_ICONS;
-  const file = I && I.files[name] ? I.files[name] : undefined;
-  const inner = I && I.fallback[name] ? I.fallback[name] : '';
   return (
     <svg
       className={'pxi ' + className}
-      data-px={file}
+      data-px={FILE[name]}
       viewBox="0 0 24 24"
       width={size}
       height={size}
@@ -17,7 +15,7 @@ export const Px = memo(function Px({ name, size = 20, className = '' }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      dangerouslySetInnerHTML={{ __html: inner }}
+      dangerouslySetInnerHTML={{ __html: FB[name] || '' }}
     />
   );
 });

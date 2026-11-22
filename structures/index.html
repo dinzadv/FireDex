@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14151c">
+<link rel="icon" type="image/png" href="/img/logo-64.png"><link rel="apple-touch-icon" href="/img/logo-192.png">
+<title>FireDex · Structures</title>
+<link rel="stylesheet" href="/css/co.css">
+<link rel="stylesheet" href="/css/co-ui.css">
+<link rel="stylesheet" href="/css/editor.css">
+<link rel="stylesheet" href="/css/tool-structure.css">
+<link rel="stylesheet" href="/css/tool-hud.css">
+<link rel="stylesheet" href="/css/tool-textures.css">
+<link rel="stylesheet" href="/css/tool-blocks.css">
+<link rel="stylesheet" href="/css/animator.css">
+<link rel="stylesheet" href="/css/structure-page.css">
+<script src="/js/diag.js"></script>
+<script src="/js/i18n.js"></script>
+</head>
+<body class="pg-tool">
+<div class="ed-app" id="app">
+
+  <aside class="ed-side" id="side" aria-label="Archivos del proyecto">
+    <div class="ed-side-head">
+      <a class="ed-logo" href="/" title="Menú principal"><img src="/img/logo.png" alt="FireDex"></a>
+      <div class="ed-proj">
+        <div class="ed-proj-name" id="projectNameEl">Proyecto</div>
+        <div class="ed-proj-sub" id="projectSubEl"></div>
+      </div>
+      <button class="ed-ibtn" id="addRootBtn" title="Nuevo archivo o carpeta" aria-label="Nuevo"></button>
+      <button class="ed-ibtn ed-only-mobile" id="closeSideBtn" title="Cerrar" aria-label="Cerrar"></button>
+    </div>
+    <div class="ed-search">
+      <span class="ed-search-ico" id="searchIco"></span>
+      <input type="search" id="searchInput" placeholder="Buscar archivos…" autocomplete="off" autocapitalize="off" spellcheck="false">
+    </div>
+    <div class="ed-tree" id="treeEl" role="tree"></div>
+    <div class="ed-side-foot">
+      <a class="ed-foot-btn" href="/" id="homeBtn"><span></span><small>Inicio</small></a>
+      <button class="ed-foot-btn" id="toolboxBtn"><span></span><small>Toolbox</small></button>
+      <button class="ed-foot-btn" id="boxBtn"><span></span><small>Exportar</small></button>
+      <button class="ed-foot-btn" id="settingsBtn"><span></span><small>Ajustes</small></button>
+    </div>
+  </aside>
+  <div class="ed-scrim" id="scrim"></div>
+
+  <main class="ed-main">
+    <header class="ed-top">
+      <button class="ed-ibtn" id="menuBtn" title="Archivos" aria-label="Archivos"></button>
+      <div class="ed-title" id="titleEl"></div>
+      <div class="ed-actions">
+        <button class="ed-ibtn" id="backBtn" title="Volver a la posición anterior" aria-label="Atrás"></button>
+        <button class="ed-ibtn" id="fwdBtn" title="Ir a la posición siguiente" aria-label="Adelante"></button>
+        <span class="ed-sep"></span>
+        <button class="ed-ibtn" id="undoBtn" title="Deshacer (Ctrl+Z)" aria-label="Deshacer"></button>
+        <button class="ed-ibtn" id="redoBtn" title="Rehacer (Ctrl+Shift+Z)" aria-label="Rehacer"></button>
+        <button class="ed-ibtn" id="findBtn" title="Buscar y reemplazar (Ctrl+F)" aria-label="Buscar"></button>
+        <button class="ed-ibtn ed-save" id="saveBtn" title="Guardar (Ctrl+S)" aria-label="Guardar"></button>
+        <button class="ed-ibtn" id="moreBtn" title="Más acciones" aria-label="Más"></button>
+      </div>
+    </header>
+    <div class="ed-tabs" id="tabsEl" role="tablist"></div>
+    <div class="ed-find" id="findBar" hidden>
+      <div class="ed-find-row">
+        <input id="findInput" placeholder="Buscar" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <span class="ed-find-count" id="findCount">0/0</span>
+        <button class="ed-ibtn sm" id="findPrev" title="Anterior" aria-label="Anterior"></button>
+        <button class="ed-ibtn sm" id="findNext" title="Siguiente" aria-label="Siguiente"></button>
+        <button class="ed-ibtn sm" id="findClose" title="Cerrar" aria-label="Cerrar"></button>
+      </div>
+      <div class="ed-find-row">
+        <input id="replaceInput" placeholder="Reemplazar por" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="ed-chip" id="replaceOne">Reemplazar</button>
+        <button class="ed-chip" id="replaceAll">Todo</button>
+      </div>
+    </div>
+    <div class="ed-body" id="editorEl"></div>
+    <div class="ed-problems" id="problemsEl" hidden></div>
+    <div class="ed-status" id="statusEl"></div>
+    <div class="ed-ac" id="acEl" hidden></div>
+    <div class="ed-keys" id="keysEl" hidden></div>
+  </main>
+</div>
+
+<input type="file" id="fileUploadInput" multiple style="display:none">
+<input type="file" id="folderUploadInput" webkitdirectory directory multiple style="display:none">
+
+<script src="/js/vendor/jszip.min.js"></script>
+<script src="/js/vendor/acorn.js"></script>
+<script src="/js/mcdata.js"></script>
+<script src="/js/editor-core.js"></script>
+<script src="/assets/icons.js"></script>
+<script src="/js/co.js"></script>
+<script src="/js/versions.js"></script>
+<script src="/js/co-ui.js"></script>
+<script src="/js/imgjson.js"></script>
+<script src="/js/tools2.js"></script>
+<script src="/js/vanilla.js"></script>
+<script src="/js/tool-textures.js"></script>
+<script src="/js/tool-blocks.js"></script>
+<script src="/js/struct-data.js"></script>
+<script src="/js/tool-structure.js"></script>
+<script src="/js/structure-3d.js"></script>
+<script src="/js/tool-hud.js"></script>
+<script src="/js/icons-apply.js"></script>
+<script src="/js/editor-view.js"></script>
+<script src="/js/structure-page.js"></script>
+<script src="/js/cookies.js"></script>
+</body>
+</html>

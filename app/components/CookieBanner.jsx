@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+const browser = typeof window !== "undefined";
 const KEY = "fd_cookie_notice";
 const read = () => {
   try {
@@ -8,7 +9,7 @@ const read = () => {
   }
 };
 export function CookieBanner() {
-  const [open, setOpen] = useState(() => !read() && !/^\/cookies\/?$/.test(location.pathname));
+  const [open, setOpen] = useState(() => browser && !read() && !/^\/cookies\/?$/.test(location.pathname));
   useEffect(() => {
     const onClick = (e) => {
       const b = e.target.closest && e.target.closest("[data-fd-cookie]");
