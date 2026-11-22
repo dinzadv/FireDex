@@ -48,9 +48,9 @@
     chevd: '<path d="M6 9l6 6 6-6"/>',
     folder: '<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>'
   };
-  const PXMAP = { cursor: "select", hist: "refresh", key: "star", pencil: "edit", rotate: "refresh", ruler: "line", scale: "move", sliders: "settings", uv: "grid", picker: "picker", bone: "bone", brush: "brush", bucket: "bucket", eraser: "eraser", layers: "layers" };
-  const pxSvg = (n) => window.FD_ICONS ? FD_ICONS.svg(PXMAP[n] || n, { size: 22 }) : '<svg viewBox="0 0 24 24">' + (IC[n] || "") + "</svg>";
-  const ic = (n) => '<i data-i="' + n + '">' + pxSvg(n) + "</i>";
+  const PXMAP = { back: 'arrow-left', cube: 'cube', brush: 'paint-bucket', film: 'movie', hist: 'clock', undo: 'undo', redo: 'redo', save: 'save', link: 'link', more: 'more-horizontal', trash: 'trash', copy: 'copy', plus: 'plus', minus: 'minus', play: 'play', stop: 'close-box', pencil: 'edit', wand: 'zap', layers: 'layout', key: 'key' };
+const pxSvg = (n) => '<svg' + (PXMAP[n] ? ' data-px="' + PXMAP[n] + '"' : '') + ' viewBox="0 0 24 24">' + (IC[n] || '') + '</svg>';
+const ic = (n) => '<i data-i="' + n + '">' + pxSvg(n) + "</i>";
   function hydrateIcons(root) {
     (root || document).querySelectorAll("i[data-i]:not(:has(svg))").forEach((e) => {
       e.innerHTML = pxSvg(e.dataset.i);

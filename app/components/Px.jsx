@@ -1,8 +1,23 @@
-import React from "react";
-import { iconLayers } from "../icons/pixel.js";
-export function Px({ name, size = 20, color, className = "" }) {
-  const layers = iconLayers(name, color);
-  return <svg className={"pxi " + className} viewBox="0 0 12 12" width={size} height={size} shapeRendering="crispEdges" aria-hidden="true">
-      {layers.map((l, i) => <path key={i} fill={l.fill} d={l.d} />)}
-    </svg>;
-}
+import React, { memo } from 'react';
+
+export const Px = memo(function Px({ name, size = 20, className = '' }) {
+  const I = window.FD_ICONS;
+  const file = I && I.files[name] ? I.files[name] : undefined;
+  const inner = I && I.fallback[name] ? I.fallback[name] : '';
+  return (
+    <svg
+      className={'pxi ' + className}
+      data-px={file}
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      dangerouslySetInnerHTML={{ __html: inner }}
+    />
+  );
+});
