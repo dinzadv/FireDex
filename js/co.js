@@ -1,11 +1,9 @@
 document.title = "FireDex \xB7 Editor";
 const ICONS = { "folderClosed": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>', "folderOpen": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.2A2 2 0 0 1 5 6.2h3.6l1.8 2.1H19a2 2 0 0 1 1.94 2.47l-1.18 5.1A2 2 0 0 1 17.8 17.4H5.4a2 2 0 0 1-1.95-1.56L2.06 10.2A2 2 0 0 1 3 8.2Z"/><path d="M3 8.2 5.4 6.2"/></svg>', "file": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-6-5Z"/><path d="M13 3v5h6"/></svg>', "image": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m21 15-5-5-9 9"/></svg>', "cube": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="M4 7.5 12 12l8-4.5"/><path d="M12 12v9"/></svg>', "chevron": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>', "plus": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>', "folderPlus": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><path d="M12 11v5M9.5 13.5h5"/></svg>', "folderUp": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><path d="M12 16v-5M9.5 13.5 12 11l2.5 2.5"/></svg>', "filePlus": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-6-5Z"/><path d="M13 3v5h6"/><path d="M9 15h6M12 12v6"/></svg>', "fileUp": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-6-5Z"/><path d="M13 3v5h6"/><path d="M9 17.5v-5M6.5 15l2.5-2.5 2.5 2.5"/></svg>', "trash": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/></svg>', "edit": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>', "move": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9V7a2 2 0 0 1 2-2h3l2 2.5h5a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-2"/><path d="M2 13h9M8 9.5 11.5 13 8 16.5"/></svg>', "download": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5"/><path d="M4 18v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg>', "warn": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4.5"/><circle cx="12" cy="17.3" r=".2" fill="currentColor"/></svg>', "emptyDoc": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-6-5Z"/><path d="M13 3v5h6"/><path d="M9 13h6M9 17h4"/></svg>', "package": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>', "structure": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4H6.5A2.5 2.5 0 0 0 4 6.5v3A2.5 2.5 0 0 1 1.5 12 2.5 2.5 0 0 1 4 14.5v3A2.5 2.5 0 0 0 6.5 20H8"/><path d="M16 4h1.5A2.5 2.5 0 0 1 20 6.5v3a2.5 2.5 0 0 0 2.5 2.5 2.5 2.5 0 0 0-2.5 2.5v3a2.5 2.5 0 0 1-2.5 2.5H16"/></svg>', "varIcon": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9.5 9.5 5 5m0-5-5 5"/></svg>', "tagIcon": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 3H6a1 1 0 0 0-1 1v6.5a1 1 0 0 0 .3.7l9 9a1 1 0 0 0 1.4 0l6.5-6.5a1 1 0 0 0 0-1.4l-9-9a1 1 0 0 0-.7-.3Z"/><circle cx="8.3" cy="8.3" r="1.3"/></svg>', "syntaxIcon": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 8-4 4 4 4"/><path d="m15 8 4 4-4 4"/></svg>', "save": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M8 3v5h8V3"/><path d="M7 13h10v8H7z"/></svg>', "play": '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M7.5 4.8v14.4a1 1 0 0 0 1.53.85l11.2-7.2a1 1 0 0 0 0-1.7l-11.2-7.2a1 1 0 0 0-1.53.85Z"/></svg>' }, FILE_TYPES = { "js": { "bg": "#f0db4f", "color": "#1c1c1c", "label": "JS", "lang": "javascript" }, "mjs": { "bg": "#f0db4f", "color": "#1c1c1c", "label": "JS", "lang": "javascript" }, "cjs": { "bg": "#f0db4f", "color": "#1c1c1c", "label": "JS", "lang": "javascript" }, "jsx": { "bg": "#61dafb", "color": "#0b1b26", "label": "JSX", "lang": "javascript" }, "ts": { "bg": "#3178c6", "color": "#fff", "label": "TS", "lang": "typescript" }, "tsx": { "bg": "#3178c6", "color": "#fff", "label": "TSX", "lang": "typescript" }, "json": { "bg": "#f2a24b", "color": "#1c1c1c", "label": "{ }", "lang": "json" }, "html": { "bg": "#e34c26", "color": "#fff", "label": "<>", "lang": "xml" }, "htm": { "bg": "#e34c26", "color": "#fff", "label": "<>", "lang": "xml" }, "css": { "bg": "#2965f1", "color": "#fff", "label": "#", "lang": "css" }, "scss": { "bg": "#c76494", "color": "#fff", "label": "#", "lang": "css" }, "md": { "bg": "#63b3ed", "color": "#0b1220", "label": "M\u2193", "lang": "markdown" }, "py": { "bg": "#3572a5", "color": "#fff", "label": "Py", "lang": "python" }, "yml": { "bg": "#a8324a", "color": "#fff", "label": "YML", "lang": "yaml" }, "yaml": { "bg": "#a8324a", "color": "#fff", "label": "YML", "lang": "yaml" }, "txt": { "bg": "#5a5a62", "color": "#fff", "label": "TXT", "lang": "plaintext" }, "sh": { "bg": "#4eaa25", "color": "#fff", "label": "SH", "lang": "bash" }, "lang": { "bg": "#20c997", "color": "#0b1220", "label": "LANG", "lang": "plaintext" }, "material": { "bg": "#e879f9", "color": "#1c0a1c", "label": "MTL", "lang": "json" }, "mcfunction": { "bg": "#20c997", "color": "#0b1220", "label": "MCF", "lang": "plaintext" } }, IMAGE_EXTS = ["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "ico"], MODEL_EXTS = ["obj", "fbx", "glb", "gltf", "bbmodel"], BEDROCK_API_KEYWORDS = ["world", "system", "ItemStack", "BlockPermutation", "BlockTypes", "ItemTypes", "EntityComponentTypes", "EquipmentSlot", "GameMode", "Direction", "DimensionTypes", "MinecraftBlockTypes", "MinecraftItemTypes", "ScriptEventSource", "TicksPerSecond", "Vector3", "Vector2", "EntityQueryOptions", "CustomCommand", "CustomCommandStatus", "ItemComponentTypes"], LANG_KEYWORDS = { "javascript": ["const", "let", "var", "function", "return", "if", "else", "for", "while", "do", "switch", "case", "break", "continue", "class", "extends", "new", "this", "import", "export", "from", "default", "try", "catch", "finally", "throw", "async", "await", "typeof", "instanceof", "in", "of", "null", "undefined", "true", "false", "yield", "static", "get", "set", "super", ...BEDROCK_API_KEYWORDS], "typescript": ["const", "let", "var", "function", "return", "if", "else", "for", "while", "do", "switch", "case", "break", "continue", "class", "extends", "implements", "interface", "type", "enum", "new", "this", "import", "export", "from", "default", "try", "catch", "finally", "throw", "async", "await", "typeof", "instanceof", "in", "of", "null", "undefined", "true", "false", "public", "private", "protected", "readonly", ...BEDROCK_API_KEYWORDS], "xml": ["div", "span", "a", "img", "ul", "li", "ol", "p", "h1", "h2", "h3", "h4", "h5", "h6", "table", "tr", "td", "th", "thead", "tbody", "form", "input", "button", "select", "option", "textarea", "label", "header", "footer", "nav", "section", "article", "aside", "main", "script", "style", "link", "meta", "title", "head", "body", "html", "svg", "path", "iframe", "video", "audio", "source", "canvas"], "css": ["color", "background", "display", "flex", "grid", "position", "width", "height", "margin", "padding", "border", "font-size", "font-weight", "align-items", "justify-content", "transition", "transform", "overflow", "cursor", "opacity", "box-shadow", "border-radius", "important", "media", "keyframes", "hover", "focus", "active", "before", "after"], "python": ["def", "return", "if", "elif", "else", "for", "while", "import", "from", "class", "try", "except", "finally", "with", "as", "lambda", "yield", "None", "True", "False", "and", "or", "not", "in", "is"], "bash": ["if", "then", "else", "fi", "for", "do", "done", "while", "function", "echo", "export"], "json": [], "yaml": [], "plaintext": [] }, BRACKET_PAIRS = { "(": ")", "[": "]", "{": "}", '"': '"', "'": "'", "`": "`" }, BRACKET_CLOSERS = [")", "]", "}", '"', "'", "`"], INDENT_OPENERS = ["(", "[", "{"], SETTINGS_KEY = "devstudio_editor_settings";
-
-/* ================= FireDex Editor · base ================= */
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const EC = window.EC;
-const sv = (p, sw) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 1.9) + '" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
+const sv = (p, sw) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 1.9) + '" stroke-linecap="round" stroke-linejoin="round">' + p + "</svg>";
 Object.assign(ICONS, {
   menu: sv('<path d="M4 7h16M4 12h16M4 17h16"/>'),
   back: sv('<path d="M15 5 8 12l7 7"/>'),
@@ -25,9 +23,12 @@ Object.assign(ICONS, {
   infoC: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 11v6" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/><circle cx="12" cy="7.3" r="1.3" fill="#fff"/></svg>',
   check: sv('<path d="m5 12.5 4.5 4.5L19 7.5"/>', 2.4),
   wand: sv('<path d="m4 20 11-11M14 4l1.2 2.3L17.5 7.5l-2.3 1.2L14 11l-1.2-2.3L10.5 7.5l2.3-1.2L14 4ZM18.5 13l.7 1.3 1.3.7-1.3.7-.7 1.3-.7-1.3-1.3-.7 1.3-.7.7-1.3Z"/>'),
-  up: sv('<path d="m6 15 6-6 6 6"/>'), down: sv('<path d="m6 9 6 6 6-6"/>'),
-  arrowL: sv('<path d="M19 12H5M11 6l-6 6 6 6"/>'), arrowR: sv('<path d="M5 12h14M13 6l6 6-6 6"/>'),
-  arrowU: sv('<path d="M12 19V5M6 11l6-6 6 6"/>'), arrowD: sv('<path d="M12 5v14M6 13l6 6 6-6"/>'),
+  up: sv('<path d="m6 15 6-6 6 6"/>'),
+  down: sv('<path d="m6 9 6 6 6-6"/>'),
+  arrowL: sv('<path d="M19 12H5M11 6l-6 6 6 6"/>'),
+  arrowR: sv('<path d="M5 12h14M13 6l6 6-6 6"/>'),
+  arrowU: sv('<path d="M12 19V5M6 11l6-6 6 6"/>'),
+  arrowD: sv('<path d="M12 5v14M6 13l6 6 6-6"/>'),
   copy: sv('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>'),
   line: sv('<path d="M4 6h16M4 12h10M4 18h13"/>'),
   eye: sv('<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>'),
@@ -36,80 +37,162 @@ Object.assign(ICONS, {
   term: sv('<path d="m5 8 4 4-4 4M12 17h7"/>'),
   snapshot: sv('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')
 });
-
 const EDITOR_DEFAULTS = { autocomplete: true, autoClose: true, lineNumbers: true, fontSize: 14, tabSize: 2, autoSave: true, lint: true, mcHints: true };
 let editorSettings = loadEditorSettings();
-function loadEditorSettings() { try { return Object.assign({}, EDITOR_DEFAULTS, JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')); } catch (e) { return Object.assign({}, EDITOR_DEFAULTS); } }
-function saveEditorSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(editorSettings)); } catch (e) { } }
-
-function escapeHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-const BINARY_EXTS = ['ogg', 'wav', 'mp3', 'fsb', 'mcstructure', 'nbt', 'zip', 'mcpack', 'mcaddon', 'ttf', 'otf', 'woff', 'woff2', 'tga', 'dat', 'ldb', 'bin', 'mp4', 'pdf'];
-
-/* ---------- Tipos de archivo e íconos ---------- */
-const FOLDER_COLORS = { scripts: '#f7df1e', textures: '#c084fc', models: '#2dd4bf', entities: '#4ade80', entity: '#4ade80', items: '#fb923c', blocks: '#a8a29e', recipes: '#f472b6', loot_tables: '#fbbf24', animations: '#38bdf8', animation_controllers: '#38bdf8', render_controllers: '#60a5fa', particles: '#f0abfc', sounds: '#34d399', texts: '#20c997', functions: '#4ade80', ui: '#fb7185', attachables: '#fdba74', spawn_rules: '#86efac', biomes: '#86efac', features: '#a3e635', materials: '#e879f9', behavior_packs: '#7c8cff', resource_packs: '#f59e0b', bp: '#7c8cff', rp: '#f59e0b' };
-const JSON_KINDS = [['entities', 'Entidad'], ['entity', 'Entidad'], ['items', 'Objeto'], ['blocks', 'Bloque'], ['recipes', 'Receta'], ['loot_tables', 'Loot table'], ['animation_controllers', 'Controlador de animación'], ['animations', 'Animación'], ['render_controllers', 'Render controller'], ['particles', 'Partícula'], ['spawn_rules', 'Spawn rule'], ['attachables', 'Attachable'], ['biomes', 'Bioma'], ['features', 'Feature'], ['sounds', 'Sonidos'], ['ui', 'Interfaz'], ['texts', 'Textos'], ['trading', 'Comercio'], ['dialogue', 'Diálogo']];
+function loadEditorSettings() {
+  try {
+    return Object.assign({}, EDITOR_DEFAULTS, JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"));
+  } catch (e) {
+    return Object.assign({}, EDITOR_DEFAULTS);
+  }
+}
+function saveEditorSettings() {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(editorSettings));
+  } catch (e) {
+  }
+}
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+const BINARY_EXTS = ["ogg", "wav", "mp3", "fsb", "mcstructure", "nbt", "zip", "mcpack", "mcaddon", "ttf", "otf", "woff", "woff2", "tga", "dat", "ldb", "bin", "mp4", "pdf"];
+const FOLDER_COLORS = { scripts: "#f7df1e", textures: "#c084fc", models: "#2dd4bf", entities: "#4ade80", entity: "#4ade80", items: "#fb923c", blocks: "#a8a29e", recipes: "#f472b6", loot_tables: "#fbbf24", animations: "#38bdf8", animation_controllers: "#38bdf8", render_controllers: "#60a5fa", particles: "#f0abfc", sounds: "#34d399", texts: "#20c997", functions: "#4ade80", ui: "#fb7185", attachables: "#fdba74", spawn_rules: "#86efac", biomes: "#86efac", features: "#a3e635", materials: "#e879f9", behavior_packs: "#7c8cff", resource_packs: "#f59e0b", bp: "#7c8cff", rp: "#f59e0b" };
+const JSON_KINDS = [["entities", "Entidad"], ["entity", "Entidad"], ["items", "Objeto"], ["blocks", "Bloque"], ["recipes", "Receta"], ["loot_tables", "Loot table"], ["animation_controllers", "Controlador de animaci\xF3n"], ["animations", "Animaci\xF3n"], ["render_controllers", "Render controller"], ["particles", "Part\xEDcula"], ["spawn_rules", "Spawn rule"], ["attachables", "Attachable"], ["biomes", "Bioma"], ["features", "Feature"], ["sounds", "Sonidos"], ["ui", "Interfaz"], ["texts", "Textos"], ["trading", "Comercio"], ["dialogue", "Di\xE1logo"]];
 const BADGES = {
-  js: { bg: '#f7df1e', fg: '#1b1b1b', t: 'JS' }, mjs: { bg: '#f7df1e', fg: '#1b1b1b', t: 'JS' }, cjs: { bg: '#f7df1e', fg: '#1b1b1b', t: 'JS' }, jsx: { bg: '#61dafb', fg: '#0b1b26', t: 'JSX' },
-  ts: { bg: '#3178c6', fg: '#fff', t: 'TS' }, mts: { bg: '#3178c6', fg: '#fff', t: 'TS' }, cts: { bg: '#3178c6', fg: '#fff', t: 'TS' }, tsx: { bg: '#3178c6', fg: '#fff', t: 'TSX' },
-  json: { bg: '#f2a24b', fg: '#1b1b1b', t: '{}' }, jsonc: { bg: '#f2a24b', fg: '#1b1b1b', t: '{}' }, mcmeta: { bg: '#f2a24b', fg: '#1b1b1b', t: '{}' },
-  html: { bg: '#e34c26', fg: '#fff', t: '<>' }, htm: { bg: '#e34c26', fg: '#fff', t: '<>' }, xml: { bg: '#e34c26', fg: '#fff', t: '<>' }, svg: { bg: '#ffb13b', fg: '#1b1b1b', t: 'SVG' },
-  css: { bg: '#2965f1', fg: '#fff', t: '#' }, scss: { bg: '#c76494', fg: '#fff', t: '#' }, md: { bg: '#63b3ed', fg: '#0b1220', t: 'M↓' },
-  mcfunction: { bg: '#4ade80', fg: '#06210f', t: '/_' }, lang: { bg: '#20c997', fg: '#06231c', t: 'Aa' }, material: { bg: '#e879f9', fg: '#2a0a30', t: 'MAT' },
-  py: { bg: '#3572a5', fg: '#fff', t: 'Py' }, yml: { bg: '#cb4b5f', fg: '#fff', t: 'YML' }, yaml: { bg: '#cb4b5f', fg: '#fff', t: 'YML' }, sh: { bg: '#4eaa25', fg: '#fff', t: 'SH' },
-  txt: { bg: '#6b7089', fg: '#fff', t: 'TXT' }, bbmodel: { bg: '#2dd4bf', fg: '#04211d', t: 'BB' }
+  js: { bg: "#f7df1e", fg: "#1b1b1b", t: "JS" },
+  mjs: { bg: "#f7df1e", fg: "#1b1b1b", t: "JS" },
+  cjs: { bg: "#f7df1e", fg: "#1b1b1b", t: "JS" },
+  jsx: { bg: "#61dafb", fg: "#0b1b26", t: "JSX" },
+  ts: { bg: "#3178c6", fg: "#fff", t: "TS" },
+  mts: { bg: "#3178c6", fg: "#fff", t: "TS" },
+  cts: { bg: "#3178c6", fg: "#fff", t: "TS" },
+  tsx: { bg: "#3178c6", fg: "#fff", t: "TSX" },
+  json: { bg: "#f2a24b", fg: "#1b1b1b", t: "{}" },
+  jsonc: { bg: "#f2a24b", fg: "#1b1b1b", t: "{}" },
+  mcmeta: { bg: "#f2a24b", fg: "#1b1b1b", t: "{}" },
+  html: { bg: "#e34c26", fg: "#fff", t: "<>" },
+  htm: { bg: "#e34c26", fg: "#fff", t: "<>" },
+  xml: { bg: "#e34c26", fg: "#fff", t: "<>" },
+  svg: { bg: "#ffb13b", fg: "#1b1b1b", t: "SVG" },
+  css: { bg: "#2965f1", fg: "#fff", t: "#" },
+  scss: { bg: "#c76494", fg: "#fff", t: "#" },
+  md: { bg: "#63b3ed", fg: "#0b1220", t: "M\u2193" },
+  mcfunction: { bg: "#4ade80", fg: "#06210f", t: "/_" },
+  lang: { bg: "#20c997", fg: "#06231c", t: "Aa" },
+  material: { bg: "#e879f9", fg: "#2a0a30", t: "MAT" },
+  py: { bg: "#3572a5", fg: "#fff", t: "Py" },
+  yml: { bg: "#cb4b5f", fg: "#fff", t: "YML" },
+  yaml: { bg: "#cb4b5f", fg: "#fff", t: "YML" },
+  sh: { bg: "#4eaa25", fg: "#fff", t: "SH" },
+  txt: { bg: "#6b7089", fg: "#fff", t: "TXT" },
+  bbmodel: { bg: "#2dd4bf", fg: "#04211d", t: "BB" }
 };
-function pathOf(node) { return (typeof node === 'object' && node.id) ? (getNodePath(node.id) || node.name) : String(node); }
+function pathOf(node) {
+  return typeof node === "object" && node.id ? getNodePath(node.id) || node.name : String(node);
+}
 function getNodePath(id, cur, acc) {
-  cur = cur || state.root; acc = acc || [];
-  if (cur.id === id) return acc.concat(cur.id === 'root' ? [] : [cur.name]).join('/');
-  if (cur.children) for (const c of cur.children) { const r = getNodePath(id, c, cur.id === 'root' ? acc : acc.concat([cur.name])); if (r) return r; }
+  cur = cur || state.root;
+  acc = acc || [];
+  if (cur.id === id) return acc.concat(cur.id === "root" ? [] : [cur.name]).join("/");
+  if (cur.children) for (const c of cur.children) {
+    const r = getNodePath(id, c, cur.id === "root" ? acc : acc.concat([cur.name]));
+    if (r) return r;
+  }
   return null;
 }
-/** Metadatos de un archivo (nodo o nombre). */
 function fileMeta(arg) {
-  const name = typeof arg === 'string' ? arg : arg.name; const path = typeof arg === 'object' ? (getNodePath(arg.id) || name) : name; const ext = getExt(name);
-  const content = typeof arg === 'object' ? arg.content : '';
-  const lower = name.toLowerCase(); const lang = EC.langOf(name); const L = EC.LANGS[lang];
+  const name = typeof arg === "string" ? arg : arg.name;
+  const path = typeof arg === "object" ? getNodePath(arg.id) || name : name;
+  const ext = getExt(name);
+  const content = typeof arg === "object" ? arg.content : "";
+  const lower = name.toLowerCase();
+  const lang = EC.langOf(name);
+  const L = EC.LANGS[lang];
   const m = { name, path, ext, lang, langName: L.name, isModel: false, isImage: false, isBinary: false, bg: L.color, color: L.ink, label: L.short, kind: L.name, badge: BADGES[ext] };
-  if (IMAGE_EXTS.includes(ext)) { if (ext === 'svg') { m.isImage = false; m.lang = 'html'; m.kind = 'SVG'; return m; } return Object.assign(m, { isImage: true, bg: '#a855f7', color: '#fff', label: 'IMG', kind: 'Imagen ' + ext.toUpperCase(), lang: 'text', icon: 'image' }); }
-  if (BINARY_EXTS.includes(ext) || (typeof content === 'string' && content.startsWith('data:') && !IMAGE_EXTS.includes(ext))) return Object.assign(m, { isBinary: true, bg: '#6b7089', color: '#fff', label: ext.toUpperCase().slice(0, 4) || 'BIN', kind: 'Archivo binario', lang: 'text' });
-  if (typeof isModelFile === 'function' && isModelFile(path, name, content)) { m.isModel = true; m.bg = 'var(--model)'; m.color = '#fff'; m.icon = 'cube'; m.kind = ext === 'json' ? 'JSON · Modelo' : 'Modelo 3D'; if (ext === 'json') m.lang = 'json'; else if (ext === 'bbmodel') m.lang = 'json'; else m.lang = 'text'; return m; }
-  if (lower === 'manifest.json') { m.bg = '#ff9f1c'; m.color = '#1b1b1b'; m.icon = 'puzzle'; m.kind = 'JSON · Manifest'; return m; }
-  if (ext === 'json') { const seg = path.toLowerCase().split('/'); const hit = JSON_KINDS.find((k) => seg.includes(k[0])); if (hit) m.kind = 'JSON · ' + hit[1]; }
-  if (ext === 'lang') m.icon = 'globe';
-  if (!EXT_KNOWN(ext) ) { m.generic = true; m.label = ext ? ext.toUpperCase().slice(0, 3) : '··'; m.bg = '#4b4f66'; m.color = '#fff'; m.kind = 'Texto'; }
-  if (m.badge) { m.bg = m.badge.bg; m.color = m.badge.fg; m.label = m.badge.t; }
+  if (IMAGE_EXTS.includes(ext)) {
+    if (ext === "svg") {
+      m.isImage = false;
+      m.lang = "html";
+      m.kind = "SVG";
+      return m;
+    }
+    return Object.assign(m, { isImage: true, bg: "#a855f7", color: "#fff", label: "IMG", kind: "Imagen " + ext.toUpperCase(), lang: "text", icon: "image" });
+  }
+  if (BINARY_EXTS.includes(ext) || typeof content === "string" && content.startsWith("data:") && !IMAGE_EXTS.includes(ext)) return Object.assign(m, { isBinary: true, bg: "#6b7089", color: "#fff", label: ext.toUpperCase().slice(0, 4) || "BIN", kind: "Archivo binario", lang: "text" });
+  if (typeof isModelFile === "function" && isModelFile(path, name, content)) {
+    m.isModel = true;
+    m.bg = "var(--model)";
+    m.color = "#fff";
+    m.icon = "cube";
+    m.kind = ext === "json" ? "JSON \xB7 Modelo" : "Modelo 3D";
+    if (ext === "json") m.lang = "json";
+    else if (ext === "bbmodel") m.lang = "json";
+    else m.lang = "text";
+    return m;
+  }
+  if (lower === "manifest.json") {
+    m.bg = "#ff9f1c";
+    m.color = "#1b1b1b";
+    m.icon = "puzzle";
+    m.kind = "JSON \xB7 Manifest";
+    return m;
+  }
+  if (ext === "json") {
+    const seg = path.toLowerCase().split("/");
+    const hit = JSON_KINDS.find((k) => seg.includes(k[0]));
+    if (hit) m.kind = "JSON \xB7 " + hit[1];
+  }
+  if (ext === "lang") m.icon = "globe";
+  if (!EXT_KNOWN(ext)) {
+    m.generic = true;
+    m.label = ext ? ext.toUpperCase().slice(0, 3) : "\xB7\xB7";
+    m.bg = "#4b4f66";
+    m.color = "#fff";
+    m.kind = "Texto";
+  }
+  if (m.badge) {
+    m.bg = m.badge.bg;
+    m.color = m.badge.fg;
+    m.label = m.badge.t;
+  }
   return m;
 }
-function EXT_KNOWN(ext) { return !!(BADGES[ext] || EC.langOf('x.' + ext) !== 'text'); }
-/** HTML del ícono de un archivo (insignia legible, 24px). */
+function EXT_KNOWN(ext) {
+  return !!(BADGES[ext] || EC.langOf("x." + ext) !== "text");
+}
 function fileIconHtml(node, size) {
-  const m = fileMeta(node); const cls = 'fi' + (size ? ' ' + size : '');
-  if (m.isImage && node.content && node.content.startsWith('data:')) return '<img class="fi-thumb ' + (size || '') + '" src="' + node.content + '" alt="">';
+  const m = fileMeta(node);
+  const cls = "fi" + (size ? " " + size : "");
+  if (m.isImage && node.content && node.content.startsWith("data:")) return '<img class="fi-thumb ' + (size || "") + '" src="' + node.content + '" alt="">';
   const inner = m.icon && ICONS[m.icon] ? ICONS[m.icon] : escapeHtml(m.label);
-  return '<span class="' + cls + (m.icon ? ' ico' : '') + (m.label.length > 2 ? ' l3' : '') + '" style="--fbg:' + m.bg + ';--ffg:' + m.color + '">' + inner + '</span>';
+  return '<span class="' + cls + (m.icon ? " ico" : "") + (m.label.length > 2 ? " l3" : "") + '" style="--fbg:' + m.bg + ";--ffg:" + m.color + '">' + inner + "</span>";
 }
 function folderIconHtml(node) {
-  const c = FOLDER_COLORS[node.name.toLowerCase()] || '';
-  return '<span class="fo" ' + (c ? 'style="--fc:' + c + '"' : '') + '>' + (node.open ? ICONS.folderOpen : ICONS.folderClosed) + '</span>';
+  const c = FOLDER_COLORS[node.name.toLowerCase()] || "";
+  return '<span class="fo" ' + (c ? 'style="--fc:' + c + '"' : "") + ">" + (node.open ? ICONS.folderOpen : ICONS.folderClosed) + "</span>";
 }
-function renderFileIcon(node) { return fileIconHtml(node); }
-
-/* ---------- Plantillas de archivos nuevos ---------- */
-function uuid4() { return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }); }
+function renderFileIcon(node) {
+  return fileIconHtml(node);
+}
+function uuid4() {
+  return window.crypto && crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    return (c === "x" ? r : r & 3 | 8).toString(16);
+  });
+}
 function templateFor(name) {
-  const l = name.toLowerCase(); const ext = getExt(name);
-  if (l === 'manifest.json') return JSON.stringify({ format_version: 2, header: { name: 'Mi Addon', description: 'Descripción del addon', uuid: uuid4(), version: [1, 0, 0], min_engine_version: [1, 21, 0] }, modules: [{ type: 'data', uuid: uuid4(), version: [1, 0, 0] }] }, null, 2) + '\n';
-  if (ext === 'js' || ext === 'mjs') return 'import { world, system } from "@minecraft/server";\n\n';
-  if (ext === 'ts') return 'import { world, system } from "@minecraft/server";\n\n';
-  if (ext === 'json') return '{\n  \n}\n';
-  if (ext === 'mcfunction') return '# Comentarios con #. Los comandos van sin "/"\n';
-  if (ext === 'lang') return '## Textos: clave=Valor\n';
-  if (ext === 'md') return '# ' + name.replace(/\.md$/i, '') + '\n\n';
-  if (ext === 'html') return '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title></title>\n</head>\n<body>\n  \n</body>\n</html>\n';
-  return '';
+  const l = name.toLowerCase();
+  const ext = getExt(name);
+  if (l === "manifest.json") return JSON.stringify({ format_version: 2, header: { name: "Mi Addon", description: "Descripci\xF3n del addon", uuid: uuid4(), version: [1, 0, 0], min_engine_version: [1, 21, 0] }, modules: [{ type: "data", uuid: uuid4(), version: [1, 0, 0] }] }, null, 2) + "\n";
+  if (ext === "js" || ext === "mjs") return 'import { world, system } from "@minecraft/server";\n\n';
+  if (ext === "ts") return 'import { world, system } from "@minecraft/server";\n\n';
+  if (ext === "json") return "{\n  \n}\n";
+  if (ext === "mcfunction") return '# Comentarios con #. Los comandos van sin "/"\n';
+  if (ext === "lang") return "## Textos: clave=Valor\n";
+  if (ext === "md") return "# " + name.replace(/\.md$/i, "") + "\n\n";
+  if (ext === "html") return '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title></title>\n</head>\n<body>\n  \n</body>\n</html>\n';
+  return "";
 }
-
 function getExt(arg57) {
   return arg57.includes(".") ? arg57.split(".").pop().toLowerCase() : "";
 }
@@ -281,7 +364,7 @@ function promptModal(arg110, arg111, arg112, arg113) {
   }));
 }
 function confirmDeleteModal(arg115, arg116) {
-  showModal('\n    <div class="modal">\n      <div class="warn-icon">' + ICONS.warn + '</div>\n      <h3>Eliminar "' + arg115 + '"</h3>\n      <p>Podrás deshacerlo justo después desde el aviso inferior.</p>\n      <div class="modal-actions">\n        <button class="btn btn-ghost" id="delCancel">Cancelar</button>\n        <button class="btn btn-danger" id="delConfirm">Eliminar</button>\n      </div>\n    </div>\n  ', ((arg114) => {
+  showModal('\n    <div class="modal">\n      <div class="warn-icon">' + ICONS.warn + '</div>\n      <h3>Eliminar "' + arg115 + '"</h3>\n      <p>Podr\xE1s deshacerlo justo despu\xE9s desde el aviso inferior.</p>\n      <div class="modal-actions">\n        <button class="btn btn-ghost" id="delCancel">Cancelar</button>\n        <button class="btn btn-danger" id="delConfirm">Eliminar</button>\n      </div>\n    </div>\n  ', ((arg114) => {
     arg114.querySelector("#delCancel").onclick = closeModal, arg114.querySelector("#delConfirm").onclick = () => {
       closeModal(), arg116();
     };
@@ -289,7 +372,7 @@ function confirmDeleteModal(arg115, arg116) {
 }
 function deleteProjectModal() {
   const v109 = String(state.name || "").trim() || "project";
-  showModal('\n    <div class="modal">\n      <div class="warn-icon">' + ICONS.warn + '</div>\n      <h3>Eliminar proyecto</h3>\n      <p>Se eliminará el proyecto completo con todas sus carpetas y archivos. No se puede deshacer.</p>\n      <p>Type the project name <b style="color:var(--text);user-select:all">' + v109.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])) + '</b> to confirm.</p>\n      <input type="text" id="delProjectInput" placeholder="Project name">\n      <div class="modal-actions">\n        <button class="btn btn-ghost" id="delProjectCancel">Cancelar</button>\n        <button class="btn btn-danger" id="delProjectConfirm" disabled>Eliminar proyecto</button>\n      </div>\n    </div>\n  ', ((arg117) => {
+  showModal('\n    <div class="modal">\n      <div class="warn-icon">' + ICONS.warn + '</div>\n      <h3>Eliminar proyecto</h3>\n      <p>Se eliminar\xE1 el proyecto completo con todas sus carpetas y archivos. No se puede deshacer.</p>\n      <p>Type the project name <b style="color:var(--text);user-select:all">' + v109.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]) + '</b> to confirm.</p>\n      <input type="text" id="delProjectInput" placeholder="Project name">\n      <div class="modal-actions">\n        <button class="btn btn-ghost" id="delProjectCancel">Cancelar</button>\n        <button class="btn btn-danger" id="delProjectConfirm" disabled>Eliminar proyecto</button>\n      </div>\n    </div>\n  ', ((arg117) => {
     const delProjectInputEl = arg117.querySelector("#delProjectInput"), delProjectConfirmEl = arg117.querySelector("#delProjectConfirm");
     delProjectInputEl.focus(), delProjectInputEl.addEventListener("input", () => {
       delProjectConfirmEl.disabled = delProjectInputEl.value.trim() !== v109;
@@ -333,7 +416,7 @@ function moveFileModal(arg125) {
     }));
   })(state.root, 0);
   let v112 = findParent(arg125).id;
-  showModal('\n    <div class="modal">\n      <h3>Mover archivo</h3>\n      <p>Elige la carpeta de destino.</p>\n      <div class="folder-pick" id="folderPickList"></div>\n      <div class="modal-actions">\n        <button class="btn btn-ghost" id="moveCancel">Cancelar</button>\n        <button class="btn btn-primary" id="moveConfirm">Mover aquí</button>\n      </div>\n    </div>\n  ', ((arg124) => {
+  showModal('\n    <div class="modal">\n      <h3>Mover archivo</h3>\n      <p>Elige la carpeta de destino.</p>\n      <div class="folder-pick" id="folderPickList"></div>\n      <div class="modal-actions">\n        <button class="btn btn-ghost" id="moveCancel">Cancelar</button>\n        <button class="btn btn-primary" id="moveConfirm">Mover aqu\xED</button>\n      </div>\n    </div>\n  ', ((arg124) => {
     const folderPickListEl = arg124.querySelector("#folderPickList");
     list6.forEach((arg122) => {
       const divEl7 = document.createElement("div");
@@ -407,196 +490,501 @@ async function exportProjectFormat(arg135) {
     v123.href = URL.createObjectURL(arg134), v123.download = (state.name || "project").replace(/[\/\\?%*:|"<>]/g, "_") + "." + arg135, v123.click(), URL.revokeObjectURL(v123.href);
   });
 }
-
-/* ================= Árbol de archivos, pestañas y operaciones ================= */
 let openTabs = [];
 const treeUndo = [];
-let searchQuery = '';
-
+let searchQuery = "";
 function toast(msg, actionLabel, onAction, ms) {
-  let el = $('#edToast'); if (!el) { el = document.createElement('div'); el.id = 'edToast'; el.className = 'ed-toast'; document.body.appendChild(el); }
-  el.innerHTML = '<span>' + escapeHtml(msg) + '</span>' + (actionLabel ? '<button type="button">' + escapeHtml(actionLabel) + '</button>' : '');
-  if (actionLabel) el.querySelector('button').onclick = () => { el.classList.remove('show'); onAction && onAction(); };
-  el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), ms || (actionLabel ? 5200 : 2200));
+  let el = $("#edToast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "edToast";
+    el.className = "ed-toast";
+    document.body.appendChild(el);
+  }
+  el.innerHTML = "<span>" + escapeHtml(msg) + "</span>" + (actionLabel ? '<button type="button">' + escapeHtml(actionLabel) + "</button>" : "");
+  if (actionLabel) el.querySelector("button").onclick = () => {
+    el.classList.remove("show");
+    onAction && onAction();
+  };
+  el.classList.add("show");
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove("show"), ms || (actionLabel ? 5200 : 2200));
 }
-function snapTree(label) { treeUndo.push({ label, root: JSON.stringify(state.root), tabs: openTabs.slice(), active: activeFileId }); if (treeUndo.length > 40) treeUndo.shift(); updateTreeUndoUi(); }
+function snapTree(label) {
+  treeUndo.push({ label, root: JSON.stringify(state.root), tabs: openTabs.slice(), active: activeFileId });
+  if (treeUndo.length > 40) treeUndo.shift();
+  updateTreeUndoUi();
+}
 function undoTree() {
-  const s = treeUndo.pop(); if (!s) { toast('No hay cambios de archivos para deshacer'); return; }
-  if (typeof flushEditor === 'function') flushEditor();
-  state.root = JSON.parse(s.root); openTabs = s.tabs.filter((id) => findNode(id)); activeFileId = findNode(s.active) ? s.active : (openTabs[0] || null);
-  saveState(); render(); renderEditor(); updateTreeUndoUi(); toast('Deshecho: ' + s.label);
+  const s = treeUndo.pop();
+  if (!s) {
+    toast("No hay cambios de archivos para deshacer");
+    return;
+  }
+  if (typeof flushEditor === "function") flushEditor();
+  state.root = JSON.parse(s.root);
+  openTabs = s.tabs.filter((id) => findNode(id));
+  activeFileId = findNode(s.active) ? s.active : openTabs[0] || null;
+  saveState();
+  render();
+  renderEditor();
+  updateTreeUndoUi();
+  toast("Deshecho: " + s.label);
 }
-function updateTreeUndoUi() { const b = $('#treeUndoBtn'); if (b) b.disabled = !treeUndo.length; }
-
+function updateTreeUndoUi() {
+  const b = $("#treeUndoBtn");
+  if (b) b.disabled = !treeUndo.length;
+}
 function uniqueName(parent, name, ignoreId) {
-  const names = new Set(parent.children.filter((c) => c.id !== ignoreId).map((c) => c.name.toLowerCase())); if (!names.has(name.toLowerCase())) return name;
-  const m = /^(.*?)(\.[^.]+)?$/.exec(name); let i = 2; while (names.has((m[1] + ' (' + i + ')' + (m[2] || '')).toLowerCase())) i++; return m[1] + ' (' + i + ')' + (m[2] || '');
+  const names = new Set(parent.children.filter((c) => c.id !== ignoreId).map((c) => c.name.toLowerCase()));
+  if (!names.has(name.toLowerCase())) return name;
+  const m = /^(.*?)(\.[^.]+)?$/.exec(name);
+  let i = 2;
+  while (names.has((m[1] + " (" + i + ")" + (m[2] || "")).toLowerCase())) i++;
+  return m[1] + " (" + i + ")" + (m[2] || "");
 }
-function cleanName(n) { return String(n || '').replace(/[\\/:*?"<>|]/g, '_').replace(/^\.\.+$/, '_').trim(); }
-
+function cleanName(n) {
+  return String(n || "").replace(/[\\/:*?"<>|]/g, "_").replace(/^\.\.+$/, "_").trim();
+}
 function addFolder(parentId, name) {
-  name = cleanName(name); if (!name) return null; const p = findNode(parentId); if (!p) return null; snapTree('crear carpeta');
-  const node = { id: uid(), type: 'folder', name: uniqueName(p, name), open: false, children: [] }; p.children.push(node); p.open = true; sortChildren(p); saveState(); render(); return node;
+  name = cleanName(name);
+  if (!name) return null;
+  const p = findNode(parentId);
+  if (!p) return null;
+  snapTree("crear carpeta");
+  const node = { id: uid(), type: "folder", name: uniqueName(p, name), open: false, children: [] };
+  p.children.push(node);
+  p.open = true;
+  sortChildren(p);
+  saveState();
+  render();
+  return node;
 }
 function addFile(parentId, name, content, silent) {
-  name = cleanName(name); if (!name) return null; const p = findNode(parentId); if (!p) return null; if (!silent) snapTree('crear archivo');
-  const node = { id: uid(), type: 'file', name: uniqueName(p, name), content: content == null || content === '' ? templateFor(name) : content }; p.children.push(node); p.open = true; sortChildren(p); saveState(); render();
-  if (!silent) openFile(node.id); return node;
+  name = cleanName(name);
+  if (!name) return null;
+  const p = findNode(parentId);
+  if (!p) return null;
+  if (!silent) snapTree("crear archivo");
+  const node = { id: uid(), type: "file", name: uniqueName(p, name), content: content == null || content === "" ? templateFor(name) : content };
+  p.children.push(node);
+  p.open = true;
+  sortChildren(p);
+  saveState();
+  render();
+  if (!silent) openFile(node.id);
+  return node;
 }
-function sortChildren(p) { p.children.sort((a, b) => (a.type === b.type ? a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }) : (a.type === 'folder' ? -1 : 1))); }
+function sortChildren(p) {
+  p.children.sort((a, b) => a.type === b.type ? a.name.localeCompare(b.name, void 0, { numeric: true, sensitivity: "base" }) : a.type === "folder" ? -1 : 1);
+}
 function renameNode(id, name) {
-  name = cleanName(name); const n = findNode(id), par = findParent(id); if (!n || !par || !name || name === n.name) { render(); return; }
-  if (par.children.some((c) => c.id !== id && c.name.toLowerCase() === name.toLowerCase())) { toast('Ya existe "' + name + '" en esta carpeta'); render(); return; }
-  snapTree('renombrar'); n.name = name; sortChildren(par); saveState(); render(); if (activeFileId === id) renderEditor();
+  name = cleanName(name);
+  const n = findNode(id), par = findParent(id);
+  if (!n || !par || !name || name === n.name) {
+    render();
+    return;
+  }
+  if (par.children.some((c) => c.id !== id && c.name.toLowerCase() === name.toLowerCase())) {
+    toast('Ya existe "' + name + '" en esta carpeta');
+    render();
+    return;
+  }
+  snapTree("renombrar");
+  n.name = name;
+  sortChildren(par);
+  saveState();
+  render();
+  if (activeFileId === id) renderEditor();
 }
 function deleteNode(id) {
-  const par = findParent(id); if (!par) return; const n = findNode(id); snapTree('eliminar "' + n.name + '"');
-  par.children = par.children.filter((c) => c.id !== id); if (selectedId === id) selectedId = null;
-  pruneTabs(); saveState(); render(); renderEditor(); toast('"' + n.name + '" eliminado', 'Deshacer', undoTree);
+  const par = findParent(id);
+  if (!par) return;
+  const n = findNode(id);
+  snapTree('eliminar "' + n.name + '"');
+  par.children = par.children.filter((c) => c.id !== id);
+  if (selectedId === id) selectedId = null;
+  pruneTabs();
+  saveState();
+  render();
+  renderEditor();
+  toast('"' + n.name + '" eliminado', "Deshacer", undoTree);
 }
 function duplicateNode(id) {
-  const n = findNode(id), par = findParent(id); if (!n || !par) return; snapTree('duplicar');
-  const clone = (x) => { const c = JSON.parse(JSON.stringify(x)); const re = (y) => { y.id = uid(); (y.children || []).forEach(re); }; re(c); return c; };
-  const c = clone(n); const m = /^(.*?)(\.[^.]+)?$/.exec(n.name); c.name = uniqueName(par, m[1] + ' copia' + (n.type === 'file' && m[2] ? m[2] : ''));
-  par.children.push(c); sortChildren(par); saveState(); render(); if (c.type === 'file') openFile(c.id);
+  const n = findNode(id), par = findParent(id);
+  if (!n || !par) return;
+  snapTree("duplicar");
+  const clone = (x) => {
+    const c2 = JSON.parse(JSON.stringify(x));
+    const re = (y) => {
+      y.id = uid();
+      (y.children || []).forEach(re);
+    };
+    re(c2);
+    return c2;
+  };
+  const c = clone(n);
+  const m = /^(.*?)(\.[^.]+)?$/.exec(n.name);
+  c.name = uniqueName(par, m[1] + " copia" + (n.type === "file" && m[2] ? m[2] : ""));
+  par.children.push(c);
+  sortChildren(par);
+  saveState();
+  render();
+  if (c.type === "file") openFile(c.id);
 }
-function pruneTabs() { openTabs = openTabs.filter((id) => { const n = findNode(id); return n && n.type === 'file'; }); if (activeFileId && !findNode(activeFileId)) activeFileId = openTabs[openTabs.length - 1] || null; }
+function pruneTabs() {
+  openTabs = openTabs.filter((id) => {
+    const n = findNode(id);
+    return n && n.type === "file";
+  });
+  if (activeFileId && !findNode(activeFileId)) activeFileId = openTabs[openTabs.length - 1] || null;
+}
 function downloadFile(id) {
-  const n = findNode(id); if (!n) return; const c = n.content || ''; const a = document.createElement('a'); let url, rev = false;
-  if (c.startsWith('data:')) url = c; else { url = URL.createObjectURL(new Blob([c], { type: 'text/plain;charset=utf-8' })); rev = true; }
-  a.href = url; a.download = n.name; document.body.appendChild(a); a.click(); a.remove(); if (rev) setTimeout(() => URL.revokeObjectURL(url), 2000);
+  const n = findNode(id);
+  if (!n) return;
+  const c = n.content || "";
+  const a = document.createElement("a");
+  let url, rev = false;
+  if (c.startsWith("data:")) url = c;
+  else {
+    url = URL.createObjectURL(new Blob([c], { type: "text/plain;charset=utf-8" }));
+    rev = true;
+  }
+  a.href = url;
+  a.download = n.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  if (rev) setTimeout(() => URL.revokeObjectURL(url), 2e3);
 }
-function startRename(id) { renamingId = id; renderTree(); }
-function newFilePrompt(parentId) { promptModal('Nuevo archivo', 'nombre.js, manifest.json, main.ts…', '', (n) => addFile(parentId, n)); }
-function newFolderPrompt(parentId) { promptModal('Nueva carpeta', 'Nombre de la carpeta', '', (n) => addFolder(parentId, n)); }
-function uploadInto(id, folder) { uploadTargetFolderId = id; $(folder ? '#folderUploadInput' : '#fileUploadInput').click(); }
-
+function startRename(id) {
+  renamingId = id;
+  renderTree();
+}
+function newFilePrompt(parentId) {
+  promptModal("Nuevo archivo", "nombre.js, manifest.json, main.ts\u2026", "", (n) => addFile(parentId, n));
+}
+function newFolderPrompt(parentId) {
+  promptModal("Nueva carpeta", "Nombre de la carpeta", "", (n) => addFolder(parentId, n));
+}
+function uploadInto(id, folder) {
+  uploadTargetFolderId = id;
+  $(folder ? "#folderUploadInput" : "#fileUploadInput").click();
+}
 function folderMenuItems(n) {
   return [
-    { label: 'Nuevo archivo', icon: ICONS.filePlus, onClick: () => newFilePrompt(n.id) },
-    { label: 'Nueva carpeta', icon: ICONS.folderPlus, onClick: () => newFolderPrompt(n.id) },
-    { label: 'Subir archivos', icon: ICONS.fileUp, onClick: () => uploadInto(n.id, false) },
-    { label: 'Subir carpeta', icon: ICONS.folderUp, onClick: () => uploadInto(n.id, true) },
+    { label: "Nuevo archivo", icon: ICONS.filePlus, onClick: () => newFilePrompt(n.id) },
+    { label: "Nueva carpeta", icon: ICONS.folderPlus, onClick: () => newFolderPrompt(n.id) },
+    { label: "Subir archivos", icon: ICONS.fileUp, onClick: () => uploadInto(n.id, false) },
+    { label: "Subir carpeta", icon: ICONS.folderUp, onClick: () => uploadInto(n.id, true) },
     { sep: true },
-    { label: 'Renombrar', icon: ICONS.edit, onClick: () => startRename(n.id) },
-    { label: 'Duplicar', icon: ICONS.copy, onClick: () => duplicateNode(n.id) },
+    { label: "Renombrar", icon: ICONS.edit, onClick: () => startRename(n.id) },
+    { label: "Duplicar", icon: ICONS.copy, onClick: () => duplicateNode(n.id) },
     { sep: true },
-    { label: 'Eliminar', icon: ICONS.trash, danger: true, onClick: () => confirmDeleteModal(n.name, () => deleteNode(n.id)) }
+    { label: "Eliminar", icon: ICONS.trash, danger: true, onClick: () => confirmDeleteModal(n.name, () => deleteNode(n.id)) }
   ];
 }
 function fileMenuItems(n) {
   return [
-    { label: 'Renombrar', icon: ICONS.edit, onClick: () => startRename(n.id) },
-    { label: 'Duplicar', icon: ICONS.copy, onClick: () => duplicateNode(n.id) },
-    { label: 'Mover a…', icon: ICONS.move, onClick: () => moveFileModal(n.id) },
-    { label: 'Descargar', icon: ICONS.download, onClick: () => downloadFile(n.id) },
-    { label: 'Copiar ruta', icon: ICONS.copy, onClick: () => { copyToClipboard(getNodePath(n.id) || n.name); toast('Ruta copiada'); } },
+    { label: "Renombrar", icon: ICONS.edit, onClick: () => startRename(n.id) },
+    { label: "Duplicar", icon: ICONS.copy, onClick: () => duplicateNode(n.id) },
+    { label: "Mover a\u2026", icon: ICONS.move, onClick: () => moveFileModal(n.id) },
+    { label: "Descargar", icon: ICONS.download, onClick: () => downloadFile(n.id) },
+    { label: "Copiar ruta", icon: ICONS.copy, onClick: () => {
+      copyToClipboard(getNodePath(n.id) || n.name);
+      toast("Ruta copiada");
+    } },
     { sep: true },
-    { label: 'Eliminar', icon: ICONS.trash, danger: true, onClick: () => confirmDeleteModal(n.name, () => deleteNode(n.id)) }
+    { label: "Eliminar", icon: ICONS.trash, danger: true, onClick: () => confirmDeleteModal(n.name, () => deleteNode(n.id)) }
   ];
 }
 function rootMenuItems() {
   return [
-    { label: 'Nuevo archivo', icon: ICONS.filePlus, onClick: () => newFilePrompt('root') },
-    { label: 'Nueva carpeta', icon: ICONS.folderPlus, onClick: () => newFolderPrompt('root') },
-    { label: 'Subir archivos', icon: ICONS.fileUp, onClick: () => uploadInto('root', false) },
-    { label: 'Subir carpeta', icon: ICONS.folderUp, onClick: () => uploadInto('root', true) },
+    { label: "Nuevo archivo", icon: ICONS.filePlus, onClick: () => newFilePrompt("root") },
+    { label: "Nueva carpeta", icon: ICONS.folderPlus, onClick: () => newFolderPrompt("root") },
+    { label: "Subir archivos", icon: ICONS.fileUp, onClick: () => uploadInto("root", false) },
+    { label: "Subir carpeta", icon: ICONS.folderUp, onClick: () => uploadInto("root", true) },
     { sep: true },
-    { label: 'Deshacer cambio en archivos', icon: ICONS.snapshot, onClick: undoTree },
-    { label: 'Renombrar proyecto', icon: ICONS.edit, onClick: () => promptModal('Renombrar proyecto', 'Nombre', state.name, async (v) => { state.name = v; await saveState(); render(); }) },
+    { label: "Deshacer cambio en archivos", icon: ICONS.snapshot, onClick: undoTree },
+    { label: "Renombrar proyecto", icon: ICONS.edit, onClick: () => promptModal("Renombrar proyecto", "Nombre", state.name, async (v) => {
+      state.name = v;
+      await saveState();
+      render();
+    }) },
     { sep: true },
-    { label: 'Eliminar proyecto', icon: ICONS.trash, danger: true, onClick: () => deleteProjectModal() }
+    { label: "Eliminar proyecto", icon: ICONS.trash, danger: true, onClick: () => deleteProjectModal() }
   ];
 }
-
-/* ---------- Render del árbol ---------- */
-function filterTree(n, q) { if (!q) return true; if (n.name.toLowerCase().includes(q)) return true; return !!(n.children && n.children.some((c) => filterTree(c, q))); }
-function countFiles(n) { let c = 0; (n.children || []).forEach((x) => { c += x.type === 'file' ? 1 : countFiles(x); }); return c; }
+function filterTree(n, q) {
+  if (!q) return true;
+  if (n.name.toLowerCase().includes(q)) return true;
+  return !!(n.children && n.children.some((c) => filterTree(c, q)));
+}
+function countFiles(n) {
+  let c = 0;
+  (n.children || []).forEach((x) => {
+    c += x.type === "file" ? 1 : countFiles(x);
+  });
+  return c;
+}
 function treeHtml(n, depth, q) {
-  const isF = n.type === 'folder'; const open = isF && (q ? true : n.open);
-  const act = !isF && n.id === activeFileId; const sel = selectedId === n.id;
-  let h = '<div class="tr-node"><div class="tr-row' + (act ? ' act' : '') + (sel && !act ? ' sel' : '') + '" data-id="' + n.id + '" role="treeitem" style="--d:' + depth + '">';
-  h += '<span class="tr-chev' + (isF ? '' : ' hid') + (open ? ' open' : '') + '">' + ICONS.chevron + '</span>';
+  const isF = n.type === "folder";
+  const open = isF && (q ? true : n.open);
+  const act = !isF && n.id === activeFileId;
+  const sel = selectedId === n.id;
+  let h = '<div class="tr-node"><div class="tr-row' + (act ? " act" : "") + (sel && !act ? " sel" : "") + '" data-id="' + n.id + '" role="treeitem" style="--d:' + depth + '">';
+  h += '<span class="tr-chev' + (isF ? "" : " hid") + (open ? " open" : "") + '">' + ICONS.chevron + "</span>";
   h += isF ? folderIconHtml(Object.assign({}, n, { open })) : fileIconHtml(n);
   if (renamingId === n.id) h += '<input class="tr-input" value="' + escapeHtml(n.name) + '" autocomplete="off" autocapitalize="off" spellcheck="false">';
-  else h += '<span class="tr-name">' + escapeHtml(n.name) + '</span>';
-  if (isF) h += '<span class="tr-count">' + countFiles(n) + '</span>';
-  h += '<button class="tr-more" data-more type="button" aria-label="Opciones">' + ICONS.more + '</button></div>';
-  if (open) h += '<div class="tr-kids">' + n.children.filter((c) => filterTree(c, q)).map((c) => treeHtml(c, depth + 1, q)).join('') + '</div>';
-  return h + '</div>';
+  else h += '<span class="tr-name">' + escapeHtml(n.name) + "</span>";
+  if (isF) h += '<span class="tr-count">' + countFiles(n) + "</span>";
+  h += '<button class="tr-more" data-more type="button" aria-label="Opciones">' + ICONS.more + "</button></div>";
+  if (open) h += '<div class="tr-kids">' + n.children.filter((c) => filterTree(c, q)).map((c) => treeHtml(c, depth + 1, q)).join("") + "</div>";
+  return h + "</div>";
 }
 function renderTree() {
-  const t = $('#treeEl'); if (!t) return; const q = searchQuery;
+  const t = $("#treeEl");
+  if (!t) return;
+  const q = searchQuery;
   const kids = state.root.children.filter((c) => filterTree(c, q));
-  t.innerHTML = kids.length ? kids.map((c) => treeHtml(c, 0, q)).join('') : '<div class="tr-empty">' + (q ? 'Sin resultados para “' + escapeHtml(q) + '”' : 'El proyecto está vacío.<br>Toca <b>+</b> para crear un archivo.') + '</div>';
-  if (renamingId) { const inp = t.querySelector('.tr-input'); if (inp) { setTimeout(() => { inp.focus(); const dot = inp.value.lastIndexOf('.'); inp.setSelectionRange(0, dot > 0 ? dot : inp.value.length); }, 0);
-    let done = false; const fin = (ok) => { if (done) return; done = true; const id = renamingId; renamingId = null; if (ok && inp.value.trim()) renameNode(id, inp.value); else renderTree(); };
-    inp.addEventListener('click', (e) => e.stopPropagation()); inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') fin(true); else if (e.key === 'Escape') fin(false); }); inp.addEventListener('blur', () => fin(true)); } }
+  t.innerHTML = kids.length ? kids.map((c) => treeHtml(c, 0, q)).join("") : '<div class="tr-empty">' + (q ? "Sin resultados para \u201C" + escapeHtml(q) + "\u201D" : "El proyecto est\xE1 vac\xEDo.<br>Toca <b>+</b> para crear un archivo.") + "</div>";
+  if (renamingId) {
+    const inp = t.querySelector(".tr-input");
+    if (inp) {
+      setTimeout(() => {
+        inp.focus();
+        const dot = inp.value.lastIndexOf(".");
+        inp.setSelectionRange(0, dot > 0 ? dot : inp.value.length);
+      }, 0);
+      let done = false;
+      const fin = (ok) => {
+        if (done) return;
+        done = true;
+        const id = renamingId;
+        renamingId = null;
+        if (ok && inp.value.trim()) renameNode(id, inp.value);
+        else renderTree();
+      };
+      inp.addEventListener("click", (e) => e.stopPropagation());
+      inp.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") fin(true);
+        else if (e.key === "Escape") fin(false);
+      });
+      inp.addEventListener("blur", () => fin(true));
+    }
+  }
 }
 function render() {
-  if (!state) return; pruneTabs();
-  const pn = $('#projectNameEl'); if (pn) { pn.textContent = state.name; pn.title = state.name; }
-  const ps = $('#projectSubEl'); if (ps) { const c = countFiles(state.root); ps.textContent = c + (c === 1 ? ' archivo' : ' archivos'); }
-  renderTree(); if (typeof renderChrome === 'function') renderChrome(); updateTreeUndoUi();
+  if (!state) return;
+  pruneTabs();
+  const pn = $("#projectNameEl");
+  if (pn) {
+    pn.textContent = state.name;
+    pn.title = state.name;
+  }
+  const ps = $("#projectSubEl");
+  if (ps) {
+    const c = countFiles(state.root);
+    ps.textContent = c + (c === 1 ? " archivo" : " archivos");
+  }
+  renderTree();
+  if (typeof renderChrome === "function") renderChrome();
+  updateTreeUndoUi();
 }
 function selectNode(n) {
   selectedId = n.id;
-  if (n.type === 'folder') { n.open = !n.open; renderTree(); saveState(); } else { openFile(n.id); closeSide(); renderTree(); }
+  if (n.type === "folder") {
+    n.open = !n.open;
+    renderTree();
+    saveState();
+  } else {
+    openFile(n.id);
+    closeSide();
+    renderTree();
+  }
 }
-function openSide() { $('#side').classList.add('open'); $('#scrim').classList.add('on'); }
-function closeSide() { $('#side').classList.remove('open'); $('#scrim').classList.remove('on'); }
+function openSide() {
+  $("#side").classList.add("open");
+  $("#scrim").classList.add("on");
+}
+function closeSide() {
+  $("#side").classList.remove("open");
+  $("#scrim").classList.remove("on");
+}
 function toggleSide() {
-  if (window.matchMedia('(max-width: 860px)').matches) { $('#side').classList.contains('open') ? closeSide() : openSide(); }
-  else { const c = $('#app').classList.toggle('side-hidden'); try { localStorage.setItem('comdex_side_hidden', c ? '1' : ''); } catch (e) { } if (typeof layoutEditor === 'function') setTimeout(layoutEditor, 220); }
+  if (window.matchMedia("(max-width: 860px)").matches) {
+    $("#side").classList.contains("open") ? closeSide() : openSide();
+  } else {
+    const c = $("#app").classList.toggle("side-hidden");
+    try {
+      localStorage.setItem("comdex_side_hidden", c ? "1" : "");
+    } catch (e) {
+    }
+    if (typeof layoutEditor === "function") setTimeout(layoutEditor, 220);
+  }
 }
-
-/* ---------- Subidas ---------- */
 const SKIP_UPLOAD = /(^|\/)(\.DS_Store|__MACOSX|node_modules|\.git|Thumbs\.db)(\/|$)/;
 function readUpload(file) {
   return new Promise((res) => {
-    const ext = getExt(file.name); const fr = new FileReader(); const asData = IMAGE_EXTS.includes(ext) && ext !== 'svg' || BINARY_EXTS.includes(ext) || file.size > 4 * 1024 * 1024;
-    fr.onload = () => res(fr.result); fr.onerror = () => res(''); asData ? fr.readAsDataURL(file) : fr.readAsText(file);
+    const ext = getExt(file.name);
+    const fr = new FileReader();
+    const asData = IMAGE_EXTS.includes(ext) && ext !== "svg" || BINARY_EXTS.includes(ext) || file.size > 4 * 1024 * 1024;
+    fr.onload = () => res(fr.result);
+    fr.onerror = () => res("");
+    asData ? fr.readAsDataURL(file) : fr.readAsText(file);
   });
 }
 async function handleFileUpload(files) {
-  snapTree('subir archivos'); let n = 0; const p = findNode(uploadTargetFolderId || 'root');
-  for (const f of files) { if (SKIP_UPLOAD.test(f.name)) continue; const content = await readUpload(f); const name = uniqueName(p, cleanName(f.name) || 'archivo'); p.children.push({ id: uid(), type: 'file', name, content }); n++; }
-  p.open = true; sortChildren(p); await saveState(); render(); toast(n + (n === 1 ? ' archivo subido' : ' archivos subidos'), 'Deshacer', undoTree);
+  snapTree("subir archivos");
+  let n = 0;
+  const p = findNode(uploadTargetFolderId || "root");
+  for (const f of files) {
+    if (SKIP_UPLOAD.test(f.name)) continue;
+    const content = await readUpload(f);
+    const name = uniqueName(p, cleanName(f.name) || "archivo");
+    p.children.push({ id: uid(), type: "file", name, content });
+    n++;
+  }
+  p.open = true;
+  sortChildren(p);
+  await saveState();
+  render();
+  toast(n + (n === 1 ? " archivo subido" : " archivos subidos"), "Deshacer", undoTree);
 }
 async function handleFolderUpload(files) {
-  snapTree('subir carpeta'); const base = findNode(uploadTargetFolderId || 'root'); const cache = { '': base }; let n = 0;
+  snapTree("subir carpeta");
+  const base = findNode(uploadTargetFolderId || "root");
+  const cache = { "": base };
+  let n = 0;
   for (const f of files) {
-    const rel = f.webkitRelativePath || f.name; if (SKIP_UPLOAD.test(rel)) continue; const parts = rel.split('/'); const fname = parts.pop(); let key = '', cur = base;
-    for (const seg of parts) { key = key ? key + '/' + seg : seg; if (!cache[key]) { const nf = { id: uid(), type: 'folder', name: seg, open: false, children: [] }; cur.children.push(nf); cache[key] = nf; } cur = cache[key]; }
-    cur.children.push({ id: uid(), type: 'file', name: fname, content: await readUpload(f) }); n++;
+    const rel = f.webkitRelativePath || f.name;
+    if (SKIP_UPLOAD.test(rel)) continue;
+    const parts = rel.split("/");
+    const fname = parts.pop();
+    let key = "", cur = base;
+    for (const seg of parts) {
+      key = key ? key + "/" + seg : seg;
+      if (!cache[key]) {
+        const nf = { id: uid(), type: "folder", name: seg, open: false, children: [] };
+        cur.children.push(nf);
+        cache[key] = nf;
+      }
+      cur = cache[key];
+    }
+    cur.children.push({ id: uid(), type: "file", name: fname, content: await readUpload(f) });
+    n++;
   }
-  base.open = true; Object.values(cache).forEach((x) => x.children && sortChildren(x)); await saveState(); render(); toast(n + ' archivos subidos', 'Deshacer', undoTree);
+  base.open = true;
+  Object.values(cache).forEach((x) => x.children && sortChildren(x));
+  await saveState();
+  render();
+  toast(n + " archivos subidos", "Deshacer", undoTree);
 }
-
-/* ---------- Pestañas persistentes ---------- */
-function tabsKey() { return 'comdex_tabs_' + (state && state.id); }
-function saveTabs() { try { localStorage.setItem(tabsKey(), JSON.stringify({ tabs: openTabs, active: activeFileId })); } catch (e) { } }
-function restoreTabs() { try { const s = JSON.parse(localStorage.getItem(tabsKey()) || 'null'); if (s) { openTabs = (s.tabs || []).filter((id) => { const n = findNode(id); return n && n.type === 'file'; }); activeFileId = findNode(s.active) ? s.active : (openTabs[0] || null); } } catch (e) { } }
-
+function tabsKey() {
+  return "comdex_tabs_" + (state && state.id);
+}
+function saveTabs() {
+  try {
+    localStorage.setItem(tabsKey(), JSON.stringify({ tabs: openTabs, active: activeFileId }));
+  } catch (e) {
+  }
+}
+function restoreTabs() {
+  try {
+    const s = JSON.parse(localStorage.getItem(tabsKey()) || "null");
+    if (s) {
+      openTabs = (s.tabs || []).filter((id) => {
+        const n = findNode(id);
+        return n && n.type === "file";
+      });
+      activeFileId = findNode(s.active) ? s.active : openTabs[0] || null;
+    }
+  } catch (e) {
+  }
+}
 async function initApp() {
-  state = await loadOrCreateProject(); restoreTabs();
-  if (!activeFileId) { const first = (function f(n) { for (const c of (n.children || [])) { if (c.type === 'file') { if (/^(main|index)\.(js|ts)$/i.test(c.name)) return c; } const r = c.type === 'folder' ? f(c) : null; if (r) return r; } return null; })(state.root); if (first) { activeFileId = first.id; openTabs = [first.id]; } }
-  try { if (localStorage.getItem('comdex_side_hidden') === '1' && !window.matchMedia('(max-width: 860px)').matches) $('#app').classList.add('side-hidden'); } catch (e) { }
-  // iconos de botones
-  const setI = (sel, ic) => { const e = $(sel); if (e) e.innerHTML = ICONS[ic]; };
-  setI('#addRootBtn', 'plus'); setI('#closeSideBtn', 'close'); setI('#searchIco', 'find'); setI('#menuBtn', 'menu');
-  setI('#homeBtn span', 'home'); setI('#toolboxBtn span', 'toolbox'); setI('#boxBtn span', 'box'); setI('#settingsBtn span', 'gear');
-  $('#addRootBtn').addEventListener('click', (e) => { e.stopPropagation(); openMenu(e.currentTarget, rootMenuItems()); });
-  $('#closeSideBtn').addEventListener('click', closeSide); $('#scrim').addEventListener('click', closeSide); $('#menuBtn').addEventListener('click', toggleSide);
-  $('#boxBtn').addEventListener('click', showDownloadFormatModal); $('#settingsBtn').addEventListener('click', showSettingsModal);
-  $('#searchInput').addEventListener('input', (e) => { searchQuery = e.target.value.trim().toLowerCase(); renderTree(); });
-  $('#treeEl').addEventListener('click', (e) => {
-    const row = e.target.closest('.tr-row'); if (!row) return; const n = findNode(row.dataset.id); if (!n) return;
-    if (e.target.closest('[data-more]')) { e.stopPropagation(); openMenu(e.target.closest('[data-more]'), n.type === 'folder' ? folderMenuItems(n) : fileMenuItems(n)); return; }
-    if (e.target.closest('.tr-input')) return; selectNode(n);
+  state = await loadOrCreateProject();
+  restoreTabs();
+  if (!activeFileId) {
+    const first = (function f(n) {
+      for (const c of n.children || []) {
+        if (c.type === "file") {
+          if (/^(main|index)\.(js|ts)$/i.test(c.name)) return c;
+        }
+        const r = c.type === "folder" ? f(c) : null;
+        if (r) return r;
+      }
+      return null;
+    })(state.root);
+    if (first) {
+      activeFileId = first.id;
+      openTabs = [first.id];
+    }
+  }
+  try {
+    if (localStorage.getItem("comdex_side_hidden") === "1" && !window.matchMedia("(max-width: 860px)").matches) $("#app").classList.add("side-hidden");
+  } catch (e) {
+  }
+  const setI = (sel, ic) => {
+    const e = $(sel);
+    if (e) e.innerHTML = ICONS[ic];
+  };
+  setI("#addRootBtn", "plus");
+  setI("#closeSideBtn", "close");
+  setI("#searchIco", "find");
+  setI("#menuBtn", "menu");
+  setI("#homeBtn span", "home");
+  setI("#toolboxBtn span", "toolbox");
+  setI("#boxBtn span", "box");
+  setI("#settingsBtn span", "gear");
+  $("#addRootBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    openMenu(e.currentTarget, rootMenuItems());
   });
-  $('#fileUploadInput').addEventListener('change', (e) => { const f = Array.from(e.target.files); e.target.value = ''; if (f.length) handleFileUpload(f); });
-  $('#folderUploadInput').addEventListener('change', (e) => { const f = Array.from(e.target.files); e.target.value = ''; if (f.length) handleFolderUpload(f); });
-  window.addEventListener('pageshow', async (ev) => { if (!ev.persisted || !state) return; flushEditor(); const d = await getProjectData(state.id); if (d) { state.name = d.name; state.root = d.root; render(); renderEditor(); } });
-  render(); await renderEditor(); if (typeof layoutEditor === 'function') layoutEditor();
+  $("#closeSideBtn").addEventListener("click", closeSide);
+  $("#scrim").addEventListener("click", closeSide);
+  $("#menuBtn").addEventListener("click", toggleSide);
+  $("#boxBtn").addEventListener("click", showDownloadFormatModal);
+  $("#settingsBtn").addEventListener("click", showSettingsModal);
+  $("#searchInput").addEventListener("input", (e) => {
+    searchQuery = e.target.value.trim().toLowerCase();
+    renderTree();
+  });
+  $("#treeEl").addEventListener("click", (e) => {
+    const row = e.target.closest(".tr-row");
+    if (!row) return;
+    const n = findNode(row.dataset.id);
+    if (!n) return;
+    if (e.target.closest("[data-more]")) {
+      e.stopPropagation();
+      openMenu(e.target.closest("[data-more]"), n.type === "folder" ? folderMenuItems(n) : fileMenuItems(n));
+      return;
+    }
+    if (e.target.closest(".tr-input")) return;
+    selectNode(n);
+  });
+  $("#fileUploadInput").addEventListener("change", (e) => {
+    const f = Array.from(e.target.files);
+    e.target.value = "";
+    if (f.length) handleFileUpload(f);
+  });
+  $("#folderUploadInput").addEventListener("change", (e) => {
+    const f = Array.from(e.target.files);
+    e.target.value = "";
+    if (f.length) handleFolderUpload(f);
+  });
+  window.addEventListener("pageshow", async (ev) => {
+    if (!ev.persisted || !state) return;
+    flushEditor();
+    const d = await getProjectData(state.id);
+    if (d) {
+      state.name = d.name;
+      state.root = d.root;
+      render();
+      renderEditor();
+    }
+  });
+  render();
+  await renderEditor();
+  if (typeof layoutEditor === "function") layoutEditor();
 }

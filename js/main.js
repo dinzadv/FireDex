@@ -124,7 +124,7 @@ async function renderProjects() {
   const fn = (await getProjectsIndex()).sort((arg42, arg43) => arg43.updatedAt - arg42.updatedAt), projectsArea = document.getElementById("projectsArea"), projectsCount = document.getElementById("projectsCount");
   projectsCount.textContent = fn.length ? fn.length + (fn.length === 1 ? " project" : " projects") : "";
   if (!fn.length) {
-    projectsArea.innerHTML = `<div class="empty-projects">Aún no tienes proyectos guardados. Crea uno nuevo o sube un addon para empezar.</div>`;
+    projectsArea.innerHTML = `<div class="empty-projects">A\xFAn no tienes proyectos guardados. Crea uno nuevo o sube un addon para empezar.</div>`;
     return;
   }
   const divEl2 = document.createElement("div");
@@ -171,11 +171,15 @@ function showRenameModal(arg51) {
   }));
 }
 function showDeleteModal(arg53) {
-  const nm = String(arg53.name || "").trim(), safe = nm.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const nm = String(arg53.name || "").trim(), safe = nm.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   showModal('<div class="modal"><div class="warn-icon">' + ICONS.warn + '</div><h3>Delete project?</h3><p>All files of this project will be deleted. This action cannot be undone.</p><p>Type the project name <b style="color:var(--text);user-select:all">' + safe + '</b> to confirm.</p><input type="text" id="delInput" placeholder="Project name" autocomplete="off"><div class="modal-actions"><button class="btn btn-ghost" id="delCancel">Cancel</button><button class="btn btn-danger" id="delConfirm" disabled>Delete</button></div></div>', ((el) => {
     const inp = el.querySelector("#delInput"), ok = el.querySelector("#delConfirm");
-    inp.focus(); inp.addEventListener("input", () => { ok.disabled = inp.value.trim() !== nm; });
-    el.querySelector("#delCancel").onclick = closeModal; ok.onclick = async () => {
+    inp.focus();
+    inp.addEventListener("input", () => {
+      ok.disabled = inp.value.trim() !== nm;
+    });
+    el.querySelector("#delCancel").onclick = closeModal;
+    ok.onclick = async () => {
       if (inp.value.trim() !== nm) return;
       await removeProject(arg53.id), await renderProjects(), closeModal();
     };
@@ -204,7 +208,7 @@ async function showDownloadModal(arg60) {
   }
   const v18 = result3.root;
   let v19 = "mcaddon";
-  showModal('\n    <div class="modal">\n      <h3>Descargar proyecto</h3>\n      <p>Elige el formato de exportación de tu addon de Minecraft.</p>\n      <div class="fmt-grid">\n        <div class="fmt-card active" data-fmt="mcaddon">\n          <div class="fmt-icon"><img src="img/icons/ic1.jpg" alt="MCAddon"></div>\n          <div class="fmt-info">\n            <div class="fmt-name">.mcaddon</div>\n            <div class="fmt-desc">Addon de Minecraft</div>\n          </div>\n        </div>\n        <div class="fmt-card" data-fmt="zip">\n          <div class="fmt-icon">' + ICONS.package + '</div>\n          <div class="fmt-info">\n            <div class="fmt-name">.zip</div>\n            <div class="fmt-desc">Archivo comprimido</div>\n          </div>\n        </div>\n        <div class="fmt-card" data-fmt="mcpack">\n          <div class="fmt-icon"><img src="img/icons/ic1.jpg" alt="MCPack"></div>\n          <div class="fmt-info">\n            <div class="fmt-name">.mcpack</div>\n            <div class="fmt-desc">Paquete de Minecraft</div>\n          </div>\n        </div>\n        <div class="fmt-card" data-fmt="mcworld">\n          <div class="fmt-icon"><img src="img/icons/ic1.jpg" alt="MCWorld"></div>\n          <div class="fmt-info">\n            <div class="fmt-name">.mcworld</div>\n            <div class="fmt-desc">Mundo de Minecraft</div>\n          </div>\n        </div>\n      </div>\n      <div class="modal-actions">\n        <button class="btn btn-ghost" id="dlCancel">Cancel</button>\n        <button class="btn btn-primary" id="dlConfirm">Download</button>\n      </div>\n    </div>\n  ', ((arg59) => {
+  showModal('\n    <div class="modal">\n      <h3>Descargar proyecto</h3>\n      <p>Elige el formato de exportaci\xF3n de tu addon de Minecraft.</p>\n      <div class="fmt-grid">\n        <div class="fmt-card active" data-fmt="mcaddon">\n          <div class="fmt-icon"><img src="img/icons/ic1.jpg" alt="MCAddon"></div>\n          <div class="fmt-info">\n            <div class="fmt-name">.mcaddon</div>\n            <div class="fmt-desc">Addon de Minecraft</div>\n          </div>\n        </div>\n        <div class="fmt-card" data-fmt="zip">\n          <div class="fmt-icon">' + ICONS.package + '</div>\n          <div class="fmt-info">\n            <div class="fmt-name">.zip</div>\n            <div class="fmt-desc">Archivo comprimido</div>\n          </div>\n        </div>\n        <div class="fmt-card" data-fmt="mcpack">\n          <div class="fmt-icon"><img src="img/icons/ic1.jpg" alt="MCPack"></div>\n          <div class="fmt-info">\n            <div class="fmt-name">.mcpack</div>\n            <div class="fmt-desc">Paquete de Minecraft</div>\n          </div>\n        </div>\n        <div class="fmt-card" data-fmt="mcworld">\n          <div class="fmt-icon"><img src="img/icons/ic1.jpg" alt="MCWorld"></div>\n          <div class="fmt-info">\n            <div class="fmt-name">.mcworld</div>\n            <div class="fmt-desc">Mundo de Minecraft</div>\n          </div>\n        </div>\n      </div>\n      <div class="modal-actions">\n        <button class="btn btn-ghost" id="dlCancel">Cancel</button>\n        <button class="btn btn-primary" id="dlConfirm">Download</button>\n      </div>\n    </div>\n  ', ((arg59) => {
     const v20 = arg59.querySelectorAll(".fmt-card");
     v20.forEach((arg58) => {
       arg58.addEventListener("click", () => {
@@ -230,8 +234,8 @@ async function showDownloadModal(arg60) {
   }));
 }), (document.getElementById("guideCard") || document.createElement("i")).addEventListener("click", () => {
   showModal('\n    <div class="modal">\n      <div class="info-icon">' + ICONS.info + `</div>
-      <h3>Guía rápida</h3>
-      <p>Pasos básicos para empezar a trabajar con tus addons.</p>
+      <h3>Gu\xEDa r\xE1pida</h3>
+      <p>Pasos b\xE1sicos para empezar a trabajar con tus addons.</p>
       <ul class="guide-list">
         <li><b>Crear proyecto</b> \u2014 define behavior pack, resource pack and other data, then open the editor.</li>
         <li><b>Subir addon</b> \u2014 load an existing .mcaddon file to explore its contents.</li>
@@ -249,7 +253,7 @@ async function showDownloadModal(arg60) {
   document.getElementById("addonInput").click();
 });
 function showProgressModal(arg63) {
-  showModal('\n    <div class="modal">\n      <div class="info-icon">' + ICONS.package + '</div>\n      <h3>Procesando addon</h3>\n      <div class="progress-file" id="progressFileName">' + arg63 + '</div>\n      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>\n      <div class="progress-meta">\n        <span id="progressStage">Leyendo archivo…</span>\n        <span id="progressPct">0%</span>\n      </div>\n    </div>\n  ');
+  showModal('\n    <div class="modal">\n      <div class="info-icon">' + ICONS.package + '</div>\n      <h3>Procesando addon</h3>\n      <div class="progress-file" id="progressFileName">' + arg63 + '</div>\n      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>\n      <div class="progress-meta">\n        <span id="progressStage">Leyendo archivo\u2026</span>\n        <span id="progressPct">0%</span>\n      </div>\n    </div>\n  ');
 }
 function updateProgress(arg64, arg65) {
   const progressFill = document.getElementById("progressFill"), progressPct = document.getElementById("progressPct"), progressStage = document.getElementById("progressStage");
@@ -553,94 +557,60 @@ async function submitWizard(arg134) {
   const v80 = buildProjectFromWizard(arg134), v81 = genId();
   await saveProjectData(v81, arg134.name, v80), await registerProject(v81, arg134.name, arg134.cover), window.location.href = "/edit/?id=" + v81;
 }
-const canvas = document.getElementById("particles"), ctx = canvas.getContext("2d");
-let particles = [];
-function resizeCanvas() {
-  canvas.width = window.innerWidth, canvas.height = window.innerHeight;
+renderProjects();
+function fdUid() {
+  return "n" + Math.random().toString(36).slice(2, 10);
 }
-function initParticles() {
-  const v82 = Math.min(70, Math.floor(window.innerWidth * window.innerHeight / 24e3));
-  particles = [];
-  for (let v83 = 0; v83 < v82; v83++) {
-    particles.push({ "x": Math.random() * canvas.width, "y": Math.random() * canvas.height, "r": Math.random() * 1.5 + 0.6, "vx": (Math.random() - 0.5) * 0.12, "vy": (Math.random() - 0.5) * 0.12, "o": Math.random() * 0.3 + 0.06 });
+function fdFirstGeo(n) {
+  for (const c of n.children || []) {
+    if (c.type === "folder") {
+      const r = fdFirstGeo(c);
+      if (r) return r;
+    } else if (/\.geo\.json$/i.test(c.name)) return c;
   }
+  return null;
 }
-function tickParticles() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height), particles.forEach((arg135) => {
-    const v84 = "4|7|9|1|3|8|6|5|2|0".split("|");
-    let v85 = 0;
-    while (true) {
-      switch (v84[v85++]) {
-        case "0":
-          ctx.fill();
-          continue;
-        case "1":
-          if (arg135.x > canvas.width) arg135.x = 0;
-          continue;
-        case "2":
-          ctx.fillStyle = "rgba(133,119,248," + arg135.o + ")";
-          continue;
-        case "3":
-          if (arg135.y < 0) arg135.y = canvas.height;
-          continue;
-        case "4":
-          arg135.x += arg135.vx;
-          continue;
-        case "5":
-          ctx.arc(arg135.x, arg135.y, arg135.r, 0, Math.PI * 2);
-          continue;
-        case "6":
-          ctx.beginPath();
-          continue;
-        case "7":
-          arg135.y += arg135.vy;
-          continue;
-        case "8":
-          if (arg135.y > canvas.height) arg135.y = 0;
-          continue;
-        case "9":
-          if (arg135.x < 0) arg135.x = canvas.width;
-          continue;
-      }
-      break;
-    }
-  }), requestAnimationFrame(tickParticles);
-}
-window.addEventListener("resize", () => {
-  resizeCanvas(), initParticles();
-}), resizeCanvas(), initParticles(), tickParticles(), renderProjects();
-
-
-/* ================= FireDex · Modelos independientes (sin addon) ================= */
-function fdUid() { return 'n' + Math.random().toString(36).slice(2, 10); }
-function fdFirstGeo(n) { for (const c of (n.children || [])) { if (c.type === 'folder') { const r = fdFirstGeo(c); if (r) return r; } else if (/\.geo\.json$/i.test(c.name)) return c; } return null; }
 function openTargetFor(id, data) {
-  if (data && data.root && data.root.kind === 'model') { const g = fdFirstGeo(data.root); if (g) return '/model/?id=' + encodeURIComponent(id) + '&file=' + encodeURIComponent(g.id); }
-  return '/edit/?id=' + id;
+  if (data && data.root && data.root.kind === "model") {
+    const g = fdFirstGeo(data.root);
+    if (g) return "/model/?id=" + encodeURIComponent(id) + "&file=" + encodeURIComponent(g.id);
+  }
+  return "/edit/?id=" + id;
 }
-function fdSlug(n) { return (n || 'modelo').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '') || 'modelo'; }
+function fdSlug(n) {
+  return (n || "modelo").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9_]+/g, "_").replace(/^_+|_+$/g, "") || "modelo";
+}
 function fdModelFiles(slug, name) {
-  const geo = { format_version: '1.12.0', 'minecraft:geometry': [{ description: { identifier: 'geometry.' + slug, texture_width: 64, texture_height: 64, visible_bounds_width: 2, visible_bounds_height: 3, visible_bounds_offset: [0, 1.5, 0] }, bones: [{ name: 'root', pivot: [0, 0, 0] }, { name: 'body', parent: 'root', pivot: [0, 12, 0], cubes: [{ origin: [-4, 12, -2], size: [8, 12, 4], uv: [16, 16] }] }] }] };
-  const anim = { format_version: '1.8.0', animations: { ['animation.' + slug + '.idle']: { loop: true, animation_length: 2, bones: { body: { position: { '0.0': [0, 0, 0], '1.0': [0, 1, 0], '2.0': [0, 0, 0] } } } } } };
+  const geo = { format_version: "1.12.0", "minecraft:geometry": [{ description: { identifier: "geometry." + slug, texture_width: 64, texture_height: 64, visible_bounds_width: 2, visible_bounds_height: 3, visible_bounds_offset: [0, 1.5, 0] }, bones: [{ name: "root", pivot: [0, 0, 0] }, { name: "body", parent: "root", pivot: [0, 12, 0], cubes: [{ origin: [-4, 12, -2], size: [8, 12, 4], uv: [16, 16] }] }] }] };
+  const anim = { format_version: "1.8.0", animations: { ["animation." + slug + ".idle"]: { loop: true, animation_length: 2, bones: { body: { position: { "0.0": [0, 0, 0], "1.0": [0, 1, 0], "2.0": [0, 0, 0] } } } } } };
   return { geo: JSON.stringify(geo, null, 2), anim: JSON.stringify(anim, null, 2) };
 }
 async function createModelProject(name) {
-  name = (name || '').trim() || 'Mi modelo'; const slug = fdSlug(name), f = fdModelFiles(slug, name), id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  const geoNode = { id: fdUid(), type: 'file', name: slug + '.geo.json', content: f.geo };
-  const root = { id: 'root', type: 'folder', name: 'root', kind: 'model', open: true, children: [
-    { id: fdUid(), type: 'folder', name: 'models', open: true, children: [{ id: fdUid(), type: 'folder', name: 'entity', open: true, children: [geoNode] }] },
-    { id: fdUid(), type: 'folder', name: 'animations', open: true, children: [{ id: fdUid(), type: 'file', name: slug + '.animation.json', content: f.anim }] },
-    { id: fdUid(), type: 'folder', name: 'textures', open: true, children: [{ id: fdUid(), type: 'folder', name: 'entity', open: true, children: [] }] }
+  name = (name || "").trim() || "Mi modelo";
+  const slug = fdSlug(name), f = fdModelFiles(slug, name), id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const geoNode = { id: fdUid(), type: "file", name: slug + ".geo.json", content: f.geo };
+  const root = { id: "root", type: "folder", name: "root", kind: "model", open: true, children: [
+    { id: fdUid(), type: "folder", name: "models", open: true, children: [{ id: fdUid(), type: "folder", name: "entity", open: true, children: [geoNode] }] },
+    { id: fdUid(), type: "folder", name: "animations", open: true, children: [{ id: fdUid(), type: "file", name: slug + ".animation.json", content: f.anim }] },
+    { id: fdUid(), type: "folder", name: "textures", open: true, children: [{ id: fdUid(), type: "folder", name: "entity", open: true, children: [] }] }
   ] };
-  await saveProjectData(id, name, root); await registerProject(id, name, null);
-  window.location.href = '/model/?id=' + encodeURIComponent(id) + '&file=' + encodeURIComponent(geoNode.id);
+  await saveProjectData(id, name, root);
+  await registerProject(id, name, null);
+  window.location.href = "/model/?id=" + encodeURIComponent(id) + "&file=" + encodeURIComponent(geoNode.id);
 }
-(function () {
-  const b = document.getElementById('newModelBtn'); if (!b) return;
-  b.addEventListener('click', () => {
-    showModal('<div class="modal"><h3>Nuevo modelo</h3><p>Crea un modelo 3D independiente, sin necesidad de un addon. Más adelante podrás integrarlo en cualquier proyecto.</p><input id="nmName" class="px-input" value="Mi modelo" maxlength="40" style="width:100%;margin:8px 0"><div class="modal-actions"><button class="btn" id="nmCancel">Cancelar</button><button class="btn btn-primary" id="nmOk">Crear y abrir</button></div></div>', (el) => {
-      const i = el.querySelector('#nmName'); i.focus(); i.select(); el.querySelector('#nmCancel').onclick = closeModal; el.querySelector('#nmOk').onclick = () => createModelProject(i.value);
-      i.addEventListener('keydown', (e) => { if (e.key === 'Enter') createModelProject(i.value); });
+(function() {
+  const b = document.getElementById("newModelBtn");
+  if (!b) return;
+  b.addEventListener("click", () => {
+    showModal('<div class="modal"><h3>Nuevo modelo</h3><p>Crea un modelo 3D independiente, sin necesidad de un addon. M\xE1s adelante podr\xE1s integrarlo en cualquier proyecto.</p><input id="nmName" class="px-input" value="Mi modelo" maxlength="40" style="width:100%;margin:8px 0"><div class="modal-actions"><button class="btn" id="nmCancel">Cancelar</button><button class="btn btn-primary" id="nmOk">Crear y abrir</button></div></div>', (el) => {
+      const i = el.querySelector("#nmName");
+      i.focus();
+      i.select();
+      el.querySelector("#nmCancel").onclick = closeModal;
+      el.querySelector("#nmOk").onclick = () => createModelProject(i.value);
+      i.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") createModelProject(i.value);
+      });
     });
   });
 })();

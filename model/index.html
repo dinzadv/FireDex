@@ -29,6 +29,8 @@
     <button class="ib" id="intBtn" title="Integración con el addon"><i data-i="link"></i></button>
     <button class="ib" id="menuBtn" title="Más"><i data-i="more"></i></button>
     <div class="menu" id="menu" hidden>
+      <div class="menu-lang"><span>Idioma</span><button type="button" data-lang="en">English</button><button type="button" data-lang="es">Español</button></div>
+      <hr>
       <button data-act="newgeo">Nuevo modelo vacío</button>
       <button data-act="import">Importar .geo.json…</button>
       <button data-act="export">Descargar .geo.json</button>
@@ -167,6 +169,7 @@
 <input type="file" id="fileIn" accept=".json,.geo.json,application/json" hidden>
 <input type="file" id="texIn" accept="image/png,image/*" hidden>
 <script src="/js/vendor/jszip.min.js"></script>
+<script src="/assets/icons.js"></script>
 <script src="/js/model.js"></script>
 <script src="/js/model-anim.js"></script>
 <script src="/js/model-int.js"></script>
