@@ -25,7 +25,7 @@
     ["The structure is too large to import (max {0} per axis).", "La estructura es demasiado grande para importarla (máx. {0} por eje)."],
     ["Imported {0}×{1}×{2} · {3} blocks", "Importada {0}×{1}×{2} · {3} bloques"],
     ["{0} chest(s) used a loot table and were imported empty.", "{0} cofre(s) usaban una loot table y se importaron vacíos."],
-    ["Block entities other than containers (signs, banners…) are not imported.", "Las entidades de bloque que no son contenedores (carteles, banderas…) no se importan."],
+    ["Block entities other than containers and beds (signs, banners…) are not imported.", "Las entidades de bloque que no son contenedores (carteles, banderas…) no se importan."],
     ["Close", "Cerrar"],
     ["Reading file…", "Leyendo archivo…"],
     ["Imported as clipboard: choose a spot with the Paste tool.", "Importada como portapapeles: elige el sitio con la herramienta Pegar."]
@@ -219,6 +219,11 @@
       if (be.LootTable) lootChests++;
       chests.set(x + "," + y + "," + z, c);
     });
+    const beds = new Map();
+    Object.keys(bpd).forEach((k) => {
+      const idx = +k, be = bpd[k] && bpd[k].block_entity_data;
+      if (be && be.id === "Bed" && idx >= 0 && idx < vol) beds.set(Math.floor(idx / (sz * sy)) + "," + (Math.floor(idx / sz) % sy) + "," + (idx % sz), be.color | 0);
+    });
     // cofres sin entidad de bloque en el archivo
     for (let i = 0; i < vol; i++) {
       if (!grid[i] || !D.containerOf(pal[grid[i]])) continue;
@@ -227,7 +232,7 @@
     }
     let blocks = 0;
     for (let i = 0; i < vol; i++) if (grid[i]) blocks++;
-    return { sx, sy, sz, pal, grid, chests, lootChests, blocks };
+    return { sx, sy, sz, pal, grid, chests, beds, lootChests, blocks };
   }
 
   // ---------- helpers de archivo ----------

@@ -544,6 +544,29 @@
       writeBlockEntity(w, kind, c, [lx, ly, lz], c.mode === "loot" ? lootRefOf(c) : null);
       w.u8(0);
     });
+    pal.forEach((ps, pi) => {
+      if (!remap[pi] && remap[pi] !== 0 || !/(^|:)(bed|[a-z_]+_bed)(\[|$)/.test(ps)) return;
+      for (let cx = ox; cx < ox + px; cx++) for (let cy = oy; cy < oy + py; cy++) for (let cz = oz; cz < oz + pz; cz++) {
+        if (g[(cx * sy + cy) * sz + cz] !== pi) continue;
+        const lx = cx - ox, ly = cy - oy, lz = cz - oz, col = S && S.beds && S.beds.get(cx + "," + cy + "," + cz);
+        w.head(10, String((lx * py + ly) * pz + lz));
+        w.head(10, "block_entity_data");
+        w.head(1, "color");
+        w.u8(col === void 0 ? 14 : col);
+        w.head(8, "id");
+        w.str("Bed");
+        w.head(1, "isMovable");
+        w.u8(1);
+        w.head(3, "x");
+        w.i32(lx);
+        w.head(3, "y");
+        w.i32(ly);
+        w.head(3, "z");
+        w.i32(lz);
+        w.u8(0);
+        w.u8(0);
+      }
+    });
     w.u8(0);
     w.u8(0);
     w.u8(0);
@@ -562,7 +585,7 @@
     const s = {
       name: "my_structure",
       sx: 16,
-      sy: 12,
+      sy: 24,
       sz: 16,
       grid: null,
       pal: ["minecraft:air"],
@@ -647,6 +670,10 @@
       const py = isUpper(old) ? y - 1 : y + 1;
       if (inb(x, py, z) && isTallStr(S.pal[S.grid[gi(x, py, z)]])) putRaw(gi(x, py, z), 0);
     }
+    if (old && /(^|:)(bed|[a-z_]+_bed)(\[|$)/.test(old) && window.FD_STRUCT_EDIT && !(v && /bed/.test(S.pal[v]))) {
+      const pp = FD_STRUCT_EDIT.bedPartner(old, x, y, z);
+      if (pp && inb(pp[0], pp[1], pp[2]) && /bed/.test(S.pal[S.grid[gi(pp[0], pp[1], pp[2])]] || "")) putRaw(gi(pp[0], pp[1], pp[2]), 0);
+    }
     putRaw(i, v);
     const k = x + "," + y + "," + z, ns = S.pal[v];
     if (S.chests.has(k) && !contOf(ns)) S.chests.delete(k);
@@ -656,10 +683,59 @@
       S.newChest = true;
     }
   }
-  function place(x, y, z, v) {
-    setB(x, y, z, v);
+  function place(x, y, z, v, ctx) {
+    if (v && S.autoOrient !== false && window.FD_STRUCT_EDIT) {
+      const s0 = S.pal[v], s1 = FD_STRUCT_EDIT.orient(s0, x, y, z, ctx || S.placeCtx || null);
+      if (s1 && s1 !== s0) v = palIdx(s1);
+    }
     const s = S.pal[v];
+    if (v && /(^|:)(bed|[a-z_]+_bed)(\[|$)/.test(s) && !/head_piece_bit=true/.test(s) && window.FD_STRUCT_EDIT) {
+      const hd = FD_STRUCT_EDIT.bedHead(s, x, y, z);
+      setB(x, y, z, v);
+      if (hd && inb(hd[0], hd[1], hd[2]) && !S.grid[gi(hd[0], hd[1], hd[2])]) setB(hd[0], hd[1], hd[2], palIdx(withState(s, "head_piece_bit", true)));
+      return;
+    }
+    setB(x, y, z, v);
     if (v && isTallStr(s) && !isUpper(s)) setB(x, y + 1, z, palIdx(withState(s, "upper_block_bit", true)));
+  }
+  // amplía la estructura (en cualquier dirección) para que quepa la celda x,y,z
+  function expandFor(x, y, z) {
+    if (inb(x, y, z)) return true;
+    const ox = Math.max(0, -x), oy = Math.max(0, -y), oz = Math.max(0, -z);
+    const nx = Math.min(MAXAXIS, Math.max(S.sx + ox, x >= S.sx ? x + ox + 4 : 0)), ny = Math.min(MAXAXIS, Math.max(S.sy + oy, y >= S.sy ? y + oy + 8 : 0)), nz = Math.min(MAXAXIS, Math.max(S.sz + oz, z >= S.sz ? z + oz + 4 : 0));
+    if (x >= nx - ox || y >= ny - oy || z >= nz - oz) return false;
+    if (nx > MAXAXIS || ny > MAXAXIS || nz > MAXAXIS || nx * ny * nz > MAXVOL) return false;
+    fullOp(() => {
+      const g = new Uint16Array(nx * ny * nz);
+      for (let a = 0; a < S.sx; a++) for (let b = 0; b < S.sy; b++) {
+        const from = (a * S.sy + b) * S.sz, to = ((a + ox) * ny + b + oy) * nz + oz;
+        g.set(S.grid.subarray(from, from + S.sz), to);
+      }
+      const nc = new Map();
+      S.chests.forEach((c, k) => {
+        const [a, b, c2] = k.split(",").map(Number);
+        nc.set(a + ox + "," + (b + oy) + "," + (c2 + oz), c);
+      });
+      if (S.beds) {
+        const nb = new Map();
+        S.beds.forEach((c, k) => {
+          const [a, b, c2] = k.split(",").map(Number);
+          nb.set(a + ox + "," + (b + oy) + "," + (c2 + oz), c);
+        });
+        S.beds = nb;
+      }
+      S.grid = g;
+      S.sx = nx;
+      S.sy = ny;
+      S.sz = nz;
+      S.chests = nc;
+      S.sel = null;
+      S.layer = clamp(S.layer + oy, 0, ny - 1);
+    });
+    S.expShift = [ox, oy, oz];
+    fitView();
+    syncSize();
+    return true;
   }
   function applyUndo(from, to) {
     const o = from.pop();
@@ -1035,7 +1111,7 @@
   <button class="st-ib" id="stUndo" title="${T("Undo")} (Ctrl+Z)">${ico("undo")}</button><button class="st-ib" id="stRedo" title="${T("Redo")} (Ctrl+Y)">${ico("redo")}</button>
   <button class="st-ib st-dots" id="stDots" title="${T("More")}">${ico("dots", 18)}</button>
   <div class="st-menuwrap"><button class="st-btn" id="stMenu">${ico("menu", 16)}<span>${T("Structure")}</span></button><div class="st-menu" id="stMenuList" hidden>
-    <button data-m="resize">${T("Resize\u2026")}</button><button data-m="mx">${T("Mirror structure X")}</button><button data-m="mz">${T("Mirror structure Z")}</button><button data-m="rot">${T("Rotate 90\xB0")}</button>
+    <button data-m="resize">${T("Resize\u2026")}</button><button data-m="dupall">${T("Duplicate whole structure…")}</button><button data-m="mx">${T("Mirror structure X")}</button><button data-m="mz">${T("Mirror structure Z")}</button><button data-m="rot">${T("Rotate 90\xB0")}</button>
     <button data-m="replace">${T("Replace block\u2026")}</button><button data-m="trim">${T("Trim to content")}</button><button data-m="clear" class="danger">${T("Clear everything")}</button></div></div>
   <button class="st-btn primary" id="stGo">${T("Create structure")}</button>
 </header>
@@ -1120,6 +1196,7 @@
         }
       } else if (m === "create") create();
       else if (m === "import") window.FD_STRUCT_IMPORT && FD_STRUCT_IMPORT.open();
+      else if (m === "dupall") window.FD_STRUCT_EDIT && FD_STRUCT_EDIT.duplicateStructure();
       else if (m === "loot" || m === "export" || m === "gen") {
         setTab(m);
         root.dataset.sheet = "1";
@@ -1158,10 +1235,11 @@
     if (/^(pencil|eraser|rect|ellipse|line|sphere|select)$/.test(t)) h += num("stHeight", "Height", S.height, 1, S.sy);
     if (/^(rect|ellipse|sphere)$/.test(t)) h += chk("stHollow", "Hollow", S.hollow);
     h += chk("stMX", "Mirror X", S.mx) + chk("stMZ", "Mirror Z", S.mz);
+    h += chk("stAO", "Auto-orient", S.autoOrient !== false);
     if (t === "select") {
       const s = S.sel;
       h += `<span class="st-o info">${s ? T("Selection: {0}\xD7{1}\xD7{2}").replace("{0}", Math.abs(s.x1 - s.x0) + 1).replace("{1}", s.y1 - s.y0 + 1).replace("{2}", Math.abs(s.z1 - s.z0) + 1) : T("Nothing selected")}</span>
-      <button class="st-btn sm" data-a="copy" ${s ? "" : "disabled"}>${T("Copy")}</button><button class="st-btn sm" data-a="cut" ${s ? "" : "disabled"}>${T("Cut")}</button><button class="st-btn sm" data-a="fillsel" ${s ? "" : "disabled"}>${T("Fill selection")}</button><button class="st-btn sm danger" data-a="del" ${s ? "" : "disabled"}>${T("Delete")}</button>`;
+      <button class="st-btn sm" data-a="copy" ${s ? "" : "disabled"}>${T("Copy")}</button><button class="st-btn sm" data-a="cut" ${s ? "" : "disabled"}>${T("Cut")}</button><button class="st-btn sm" data-a="fillsel" ${s ? "" : "disabled"}>${T("Fill selection")}</button><button class="st-btn sm" data-sa="move" ${s ? "" : "disabled"}>${T("Move")}</button><button class="st-btn sm" data-sa="dup" ${s ? "" : "disabled"}>${T("Duplicate")}</button><button class="st-btn sm" data-sa="rot" ${s ? "" : "disabled"}>${T("Rotate")}</button><button class="st-btn sm" data-sa="mir" ${s ? "" : "disabled"}>${T("Mirror")}</button><button class="st-btn sm" data-sa="all">${T("Select all")}</button><button class="st-btn sm danger" data-a="del" ${s ? "" : "disabled"}>${T("Delete")}</button>`;
     }
     if (S.clip && t === "select") h += `<button class="st-btn sm" data-a="paste">${ico("paste", 14)} ${T("Paste")}</button>`;
     if (t === "paste") {
@@ -1607,7 +1685,7 @@
   }
   function selBox() {
     const s = S.sel;
-    return { x0: Math.min(s.x0, s.x1), x1: Math.max(s.x0, s.x1), z0: Math.min(s.z0, s.z1), z1: Math.max(s.z0, s.z1), y0: s.y0, y1: Math.min(S.sy - 1, s.y1) };
+    return { x0: Math.min(s.x0, s.x1), x1: Math.max(s.x0, s.x1), z0: Math.min(s.z0, s.z1), z1: Math.max(s.z0, s.z1), y0: Math.min(s.y0, s.y1), y1: Math.min(S.sy - 1, Math.max(s.y0, s.y1)) };
   }
   function copySel() {
     const b = selBox(), w = b.x1 - b.x0 + 1, h = b.y1 - b.y0 + 1, d = b.z1 - b.z0 + 1, cells = new Uint16Array(w * h * d), ch =  new Map();
@@ -1624,13 +1702,17 @@
     for (let x = b.x0; x <= b.x1; x++) for (let y = b.y0; y <= b.y1; y++) for (let z = b.z0; z <= b.z1; z++) fn(x, y, z);
     endOp();
   }
-  function pasteAt(px, pz) {
-    const c = S.clip;
+  function pasteAt(px, pz, py) {
+    const c = S.clip, base = py === void 0 ? S.layer : py;
+    if (py !== void 0) {
+      const need = base + c.h - 1;
+      if (need >= S.sy && !expandFor(px, need, pz)) toast(T("Outside the structure size"));
+    }
     beginOp();
     for (let x = 0; x < c.w; x++) for (let y = 0; y < c.h; y++) for (let z = 0; z < c.d; z++) {
       const v = c.cells[(x * c.h + y) * c.d + z];
       if (!v && !S.pasteAir) continue;
-      const X = px + x, Y = S.layer + y, Z = pz + z;
+      const X = px + x, Y = base + y, Z = pz + z;
       if (!inb(X, Y, Z)) continue;
       setB(X, Y, Z, v);
       const cc = c.chests.get(x + "," + y + "," + z);
@@ -2483,6 +2565,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
       if (m === "resize") resizeDialog();
       else if (m === "replace") replaceDialog();
       else if (m === "trim") trim();
+      else if (m === "dupall") window.FD_STRUCT_EDIT && FD_STRUCT_EDIT.duplicateStructure();
       else if (m === "clear") {
         if (confirm(T("Clear everything") + "?")) fullOp(() => {
           S.grid = new Uint16Array(S.sx * S.sy * S.sz);
@@ -2513,6 +2596,10 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
       else if (t.id === "stMX") S.mx = t.checked;
       else if (t.id === "stMZ") S.mz = t.checked;
       else if (t.id === "stPAir") S.pasteAir = t.checked;
+      else if (t.id === "stAO") {
+        S.autoOrient = t.checked;
+        if (window.FD_STRUCT_EDIT) FD_STRUCT_EDIT.syncDock();
+      }
     };
     $("#stOpts").onclick = (e) => {
       const a = e.target.closest("[data-a]");
@@ -2747,6 +2834,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
     S.pmap = new Map(o.pal.map((p, i) => [p, i]));
     S.grid = o.grid;
     S.chests = o.chests;
+    S.beds = o.beds || new Map();
     S.selChest = null;
     S.sel = null;
     S.undo = [];
@@ -2793,11 +2881,11 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
   }, get root() {
     return root;
   }, place, setB, beginOp, endOp, afterEdit, changed, tx, rgbOf, rgbSide, baseOf, gi, inb, palIdx, setCur, bbox, toast, doUndo, doRedo,
-    applyImported, importAsClip, popDialog, countBlocks, prepareExport, xfState, splitId, fmt, shortName, full, create, esc, T, ico, projectFiles: projectBinFiles, D, U };
+    applyImported, importAsClip, popDialog, expandFor, selBox, copySel, pasteAt, xfArray, xfClip, eachSel, fullOp, resizeTo, syncSize, fitView, reqDraw, updateTools, renderOpts, contOf, countBlocks, prepareExport, xfState, splitId, fmt, shortName, full, create, esc, T, ico, projectFiles: projectBinFiles, D, U };
   window.FD_STRUCT_API = API;
   window.FD_STRUCT = { buildPiece, NB, D: () => D, get state() {
     return S;
-  }, _test: { palIdx: (s) => palIdx(s), xfState, setState: (s) => { S = s; } } };
+  }, _test: { palIdx: (s) => palIdx(s), xfState, setState: (s) => { S = s; }, setRoot: (r) => { root = r; }, setCv: (c) => { cv = c; } } };
   TOOLBOX_TOOLS.push({
     id: "structures",
     name: "Structures",

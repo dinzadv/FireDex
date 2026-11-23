@@ -141,6 +141,7 @@
     leaves: [{ k: "persistent_bit", t: "bool", l: "Persistent (no decay)", d: true }],
     torch: [{ k: "torch_facing_direction", t: "str", o: ["top", "west", "east", "north", "south"], l: ["On floor", "Wall: west", "Wall: east", "Wall: north", "Wall: south"], d: "top" }],
     lever: [{ k: "lever_direction", t: "str", o: ["up_north_south", "up_east_west", "down_north_south", "down_east_west", "north", "south", "east", "west"], l: ["Floor N-S", "Floor E-W", "Ceiling N-S", "Ceiling E-W", "Wall north", "Wall south", "Wall east", "Wall west"], d: "up_north_south" }, { k: "open_bit", t: "bool", l: "On", d: false }],
+    bed: [{ k: "direction", t: "int", o: [0, 1, 2, 3], l: ["South", "West", "North", "East"], d: 0, dir: ["south", "west", "north", "east"] }, { k: "head_piece_bit", t: "bool", l: "Head piece", d: false }, { k: "occupied_bit", t: "bool", l: "Occupied", d: false }],
     lantern: [{ k: "hanging", t: "bool", l: "Hanging", d: false }],
     plate: [{ k: "redstone_signal", t: "int", o: [0, 15], l: ["Off", "Pressed"], d: 0 }],
     height: [{ k: "height", t: "int", o: [0, 1, 2, 3, 4, 5, 6, 7], l: ["1/8", "2/8", "3/8", "4/8", "5/8", "6/8", "7/8", "Full"], d: 0 }],
@@ -156,7 +157,8 @@
     if (/(^|_)trapdoor$/.test(n)) return S.trapdoor;
     if (/(^|_)fence_gate$/.test(n)) return S.gate;
     if (/_(log|wood|stem|hyphae)$|^bamboo_block$|^stripped_bamboo_block$|^(hay_block|bone_block|purpur_pillar|quartz_pillar|basalt|polished_basalt|smooth_basalt_unused|deepslate|dried_kelp_block_unused|iron_chain|copper_chain|.*_chain)$/.test(n) && !/^(oak|spruce|.*)_planks$/.test(n)) return S.pillar;
-    if (/^(chest|trapped_chest|furnace|blast_furnace|smoker|carved_pumpkin|lit_pumpkin|campfire|soul_campfire|ender_chest|.*copper_chest|loom|stonecutter_block|lectern|.*_bed|bed|anvil|chipped_anvil|damaged_anvil|grindstone|bell_unused|beehive|bee_nest|jukebox_unused)$/.test(n)) return S.card;
+    if (/(^|_)bed$/.test(n)) return S.bed;
+    if (/^(chest|trapped_chest|furnace|blast_furnace|smoker|carved_pumpkin|lit_pumpkin|campfire|soul_campfire|ender_chest|.*copper_chest|loom|stonecutter_block|lectern|anvil|chipped_anvil|damaged_anvil|grindstone|bell_unused|beehive|bee_nest|jukebox_unused)$/.test(n)) return S.card;
     if (/glazed_terracotta$/.test(n) || /^(barrel|piston|sticky_piston|observer|dispenser|dropper|hopper|command_block|chain_command_block|repeating_command_block|crafter_unused|end_rod|lightning_rod|.*lightning_rod)$/.test(n)) return S.face6;
     if (/_button$|^wooden_button$/.test(n)) return S.face6;
     if (/^(ladder|wall_sign|wall_banner)$/.test(n)) return S.face4;

@@ -266,6 +266,37 @@
         g.stroke();
       }
     }
+    {
+      const P = (x, y, z) => {
+        const r = pt(x, y, z);
+        return [r[0], r[1]];
+      };
+      const edges = (x0, y0, z0, x1, y1, z1, col, dash) => {
+        const c = [];
+        for (let i = 0; i < 8; i++) c.push(P(i & 1 ? x1 + 1 : x0, i & 2 ? y1 + 1 : y0, i & 4 ? z1 + 1 : z0));
+        g.save();
+        g.strokeStyle = col;
+        g.lineWidth = 2;
+        g.setLineDash(dash || []);
+        g.beginPath();
+        [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]].forEach(([p, q]) => {
+          g.moveTo(c[p][0], c[p][1]);
+          g.lineTo(c[q][0], c[q][1]);
+        });
+        g.stroke();
+        g.restore();
+      };
+      if (S.sel && edit()) {
+        const b = A.selBox();
+        edges(b.x0, b.y0, b.z0, b.x1, b.y1, b.z1, "#ffd54a");
+      }
+      if (cam.mode === "paste" && S.clip && hover) {
+        const t = target(hover);
+        edges(t[0], t[1], t[2], t[0] + S.clip.w - 1, t[1] + S.clip.h - 1, t[2] + S.clip.d - 1, "#4dd0ff", [6, 4]);
+      }
+      if (cam.mode === "select") note = T("Tap two corners to select a box");
+      else if (cam.mode === "paste") note = T("Tap where to paste");
+    }
     if (hint) hint.textContent = note;
   }
   function redraw() {
@@ -296,6 +327,17 @@
     if (x < 0 || z < 0 || x >= S.sx || z >= S.sz) return null;
     return { ground: true, x, y: planeY, z };
   }
+  let selAnchor = null;
+  const edit = () => window.FD_STRUCT_EDIT;
+  function target(h) {
+    let x = h.x, y = h.y, z = h.z;
+    if (!h.ground) {
+      x += h.n[0];
+      y += h.n[1];
+      z += h.n[2];
+    }
+    return [x, y, z];
+  }
   function act(h) {
     const S = A.S;
     if (!h) return;
@@ -313,20 +355,45 @@
       A.afterEdit();
       return;
     }
-    let x = h.x, y = h.y, z = h.z;
-    if (!h.ground) {
-      x += h.n[0];
-      y += h.n[1];
-      z += h.n[2];
-    }
-    if (!A.inb(x, y, z)) {
-      A.toast(T("Outside the structure size"));
+    if (cam.mode === "select") {
+      const c = h.ground ? [h.x, h.y, h.z] : [h.x, h.y, h.z];
+      if (!selAnchor || !S.sel) {
+        selAnchor = c;
+        edit().setSel({ x0: c[0], x1: c[0], y0: c[1], y1: c[1], z0: c[2], z1: c[2] });
+      } else {
+        const a = selAnchor;
+        selAnchor = null;
+        edit().setSel({ x0: Math.min(a[0], c[0]), x1: Math.max(a[0], c[0]), y0: Math.min(a[1], c[1]), y1: Math.max(a[1], c[1]), z0: Math.min(a[2], c[2]), z1: Math.max(a[2], c[2]) });
+      }
       return;
     }
+    let [x, y, z] = target(h);
+    if (cam.mode === "paste") {
+      if (!S.clip) {
+        A.toast(T("Nothing copied yet"));
+        return;
+      }
+      A.pasteAt(x, z, y);
+      A.afterEdit();
+      return;
+    }
+    if (!A.inb(x, y, z)) {
+      S.expShift = [0, 0, 0];
+      if (!A.expandFor(x, y, z)) {
+        A.toast(T("Outside the structure size"));
+        return;
+      }
+      const sh = S.expShift || [0, 0, 0];
+      x += sh[0];
+      y += sh[1];
+      z += sh[2];
+    }
     if (S.grid[A.gi(x, y, z)]) return;
+    S.placeCtx = { n: h.ground ? [0, 1, 0] : h.n, yaw: cam.yaw };
     A.beginOp();
     A.place(x, y, z, A.palIdx(S.cur));
     A.endOp();
+    S.placeCtx = null;
     A.afterEdit();
   }
 
@@ -410,43 +477,9 @@
   }
 
   function mkBar() {
-    bar = document.createElement("div");
-    bar.className = "s3-bar";
-    bar.innerHTML = `<div class="s3-seg" id="s3Mode"><button data-m="place" title="${T("Place blocks")}">${ic("place")}<span>${T("Place")}</span></button><button data-m="remove" title="${T("Remove blocks")}">${ic("remove")}<span>${T("Remove")}</span></button><button data-m="pick" title="${T("Pick block")}">${ic("pick")}<span>${T("Pick")}</span></button></div>
-<button class="s3-b" id="s3Cut" title="${T("Cut at current layer")}">${ic("cut")}<span>${T("Layer")}</span></button>
-<button class="s3-b" id="s3Rot" title="${T("Rotate view")}">${ic("rot")}</button>
-<button class="s3-b" id="s3Reset" title="${T("Reset camera")}">${ic("reset")}</button>`;
-    cv.parentElement.appendChild(bar);
     hint = document.createElement("div");
     hint.className = "s3-hint";
     cv.parentElement.appendChild(hint);
-    const sync = () => {
-      bar.querySelectorAll("#s3Mode button").forEach((b) => b.classList.toggle("on", b.dataset.m === cam.mode));
-      bar.querySelector("#s3Cut").classList.toggle("on", !!A.S.cut);
-    };
-    bar.querySelector("#s3Mode").onclick = (e) => {
-      const b = e.target.closest("[data-m]");
-      if (b) {
-        cam.mode = b.dataset.m;
-        sync();
-      }
-    };
-    bar.querySelector("#s3Cut").onclick = () => {
-      A.S.cut = !A.S.cut;
-      const c = root.querySelector("#stCut");
-      if (c) c.checked = A.S.cut;
-      sync();
-      redraw();
-    };
-    bar.querySelector("#s3Rot").onclick = () => {
-      cam.yaw += Math.PI / 2;
-      redraw();
-    };
-    bar.querySelector("#s3Reset").onclick = () => {
-      Object.assign(cam, { yaw: 0.78, pitch: 0.62, zoom: 1, px: 0, py: 0 });
-      redraw();
-    };
-    sync();
   }
 
   function show(v) {
@@ -471,5 +504,5 @@
     on = !!api.S.mode3;
     if (on) redraw();
   });
-  window.FD_S3 = { redraw, show, cam, get hits() { return nF; } };
+  window.FD_S3 = { redraw, show, cam, setMode: (m) => { cam.mode = m; },  get hits() { return nF; } };
 })();

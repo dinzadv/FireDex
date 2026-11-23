@@ -254,6 +254,7 @@
     if (/_stairs$/.test(id)) return "stairs";
     if (/(^|_)carpet$/.test(id)) return "carpet";
     if (id === "snow_layer") return "snow";
+    if (/(^|_)bed$/.test(id)) return "bed";
     if (/(^|_)door$/.test(id)) return "door";
     if (/(^|_)trapdoor$/.test(id)) return "trapdoor";
     if (/(^|_)fence_gate$/.test(id)) return "gate";
@@ -469,7 +470,10 @@
     if (shape === "cube" || e.custom) return null;
     let tok;
     if (shape === "chest") tok = entImg(chestPath(id)).img;
-    else if (shape === "door") {
+    else if (shape === "bed") {
+      const w = entry("minecraft:red_wool"), pl = entry("minecraft:oak_planks");
+      tok = w.faces && pl.faces ? w.faces : null;
+    } else if (shape === "door") {
       const sp = special(id, shape);
       tok = sp.done && e.done ? sp : null;
     } else tok = e.faces;
@@ -516,6 +520,12 @@
     };
     const tru = (v) => v === "true" || v === "1" || v === true;
     const dirName = (v, list) => (/^\d+$/.test(String(v)) ? list[parseInt(v, 10)] : v);
+    if (shape === "bed") {
+      const wl = entry("minecraft:red_wool"), pl = entry("minecraft:oak_planks");
+      const f = blockFaces(bx([0, 3, 0], [16, 6, 16]), pl.faces).concat(blockFaces(bx([0, 6, 0], [16, 9, 16]), wl.faces));
+      const leg = (a, b) => blockFaces(bx([a, 0, b], [a + 3, 3, b + 3]), pl.faces);
+      return { faces: f.concat(leg(0, 0), leg(13, 0), leg(0, 13), leg(13, 13)), quads: null };
+    }
     if (shape === "door") {
       const sp = special(id, shape), half = S.__half || (tru(S.upper_block_bit) ? "upper" : "lower");
       const dir = S.__dir !== undefined ? parseInt(S.__dir, 10) : parseInt(S.direction, 10) || 0;
