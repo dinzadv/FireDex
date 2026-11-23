@@ -845,6 +845,23 @@
       else cb(c);
     });
   }
+  function projectBinFiles(ext) {
+    const out = [];
+    try {
+      const pk = U.findPacks();
+      [pk.bp, pk.rp].filter(Boolean).forEach((p) => {
+        const walk = (folder, path) => {
+          (folder.children || []).forEach((c) => {
+            if (c.type === "folder") walk(c, path + "/" + c.name);
+            else if (c.name.toLowerCase().endsWith(ext) && typeof c.content === "string" && c.content.startsWith("data:")) out.push({ name: c.name, path: path + "/" + c.name, node: c });
+          });
+        };
+        walk(p.folder, p.folder.name);
+      });
+    } catch (e) {
+    }
+    return out;
+  }
   function projectIds() {
     const out = { blocks: [], items: [] };
     try {
@@ -898,7 +915,9 @@
     minus: '<path d="M5 12h14"/>',
     fit: '<path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/>',
     x: '<path d="m6 6 12 12M18 6 6 18"/>',
-    rot: '<path d="M20 11A8 8 0 1 0 18.6 16"/><path d="M20 5v6h-6"/>'
+    rot: '<path d="M20 11A8 8 0 1 0 18.6 16"/><path d="M20 5v6h-6"/>',
+    import: '<path d="M12 4v11"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M5 19h14"/>',
+    gen: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 3.8 5.2 3.8 8.5s-1.2 6.1-3.8 8.5c-2.6-2.4-3.8-5.2-3.8-8.5S9.4 5.9 12 3.5Z"/>'
   };
   const PXN = { pencil: "edit", fill: "paint-bucket", undo: "undo", redo: "redo", menu: "menu", plus: "plus", minus: "minus", x: "close", eye: "eye", dots: "more-horizontal", paste: "clipboard", rot: "reload", cube: "cube" };
   const ico = (k, w) => `<svg${PXN[k] ? ' data-px="' + PXN[k] + '"' : ""} viewBox="0 0 24 24" width="${w || 18}" height="${w || 18}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>`;
@@ -938,7 +957,7 @@
           localStorage.removeItem(DKEY());
           return;
         }
-        const j = JSON.stringify({ v: 1, name: S.name, sx: S.sx, sy: S.sy, sz: S.sz, pal: S.pal, g: rle(S.grid), chests: Array.from(S.chests.entries()), loots: S.loots, hot: S.hot, hi: S.hi, folder: S.folder, script: S.script, split: S.split, tile: S.tile, walls: S.walls });
+        const j = JSON.stringify({ v: 1, name: S.name, sx: S.sx, sy: S.sy, sz: S.sz, pal: S.pal, g: rle(S.grid), chests: Array.from(S.chests.entries()), loots: S.loots, hot: S.hot, hi: S.hi, folder: S.folder, script: S.script, split: S.split, tile: S.tile, walls: S.walls, gen: S.gen ? Object.assign({}, S.gen, { an: void 0 }) : void 0 });
         if (j.length < 4e6) localStorage.setItem(DKEY(), j);
       } catch (e) {
       }
@@ -949,7 +968,7 @@
       const j = JSON.parse(localStorage.getItem(DKEY()) || "null");
       if (!j || j.v !== 1) return null;
       const s = newState();
-      Object.assign(s, { name: j.name, sx: j.sx, sy: j.sy, sz: j.sz, pal: j.pal, folder: j.folder, script: j.script, split: j.split, tile: j.tile, walls: j.walls, hot: j.hot, hi: j.hi, loots: j.loots || [] });
+      Object.assign(s, { name: j.name, sx: j.sx, sy: j.sy, sz: j.sz, pal: j.pal, folder: j.folder, script: j.script, split: j.split, tile: j.tile, walls: j.walls, hot: j.hot, hi: j.hi, loots: j.loots || [], gen: j.gen });
       s.cur = s.hot[s.hi] || s.hot[0];
       s.pmap = new Map(s.pal.map((p, i) => [p, i]));
       s.grid = unrle(j.g, s.sx * s.sy * s.sz);
@@ -1011,6 +1030,7 @@
   <button class="st-chip" id="stSize" title="${T("Resize structure")}"><b id="stSizeTxt"></b></button>
   <span class="st-stat" id="stStat"></span>
   <span class="st-sp"></span>
+  <button class="st-btn st-imp" id="stImport" title="${T("Import structure")}">${ico("import", 16)}<span>${T("Import")}</span></button>
   <button class="st-btn st-v3" id="stView3" title="${T("Toggle 2D / 3D view")} (V)">${ico("eye", 18)}<b id="stView3Lbl">3D</b></button>
   <button class="st-ib" id="stUndo" title="${T("Undo")} (Ctrl+Z)">${ico("undo")}</button><button class="st-ib" id="stRedo" title="${T("Redo")} (Ctrl+Y)">${ico("redo")}</button>
   <button class="st-ib st-dots" id="stDots" title="${T("More")}">${ico("dots", 18)}</button>
@@ -1032,9 +1052,10 @@
   </section>
   <aside class="st-side" id="stSide" data-tab="${S.tab}">
     <div class="st-prev"><div class="st-prevbar"><b>${T("3D")}</b><label class="st-sw"><input type="checkbox" id="stCut"><span>${T("Cut at current layer")}</span></label><button class="st-ib sm" id="stRot" title="${T("Rotate view")}">${ico("rot", 16)}</button></div><canvas id="stPv" width="360" height="220"></canvas></div>
-    <div class="st-tabs" id="stTabs"><button class="st-ib st-sheetx" id="stSheetX" title="${T("Close")}">${ico("x", 16)}</button><button data-tab="blocks">${T("Blocks")}</button><button data-tab="loot">${T("Loot")}<i id="stLootN"></i></button><button data-tab="prev" class="mob">${T("3D")}</button><button data-tab="export">${T("Export")}</button></div>
+    <div class="st-tabs" id="stTabs"><button class="st-ib st-sheetx" id="stSheetX" title="${T("Close")}">${ico("x", 16)}</button><button data-tab="blocks">${T("Blocks")}</button><button data-tab="loot">${T("Loot")}<i id="stLootN"></i></button><button data-tab="gen" id="stGenTab">${ico("gen", 14)}<span>${T("Generation")}</span><i id="stGenDot"></i></button><button data-tab="prev" class="mob">${T("3D")}</button><button data-tab="export">${T("Export")}</button></div>
     <div class="st-pan" data-pan="blocks" id="stPanBlocks"></div>
     <div class="st-pan" data-pan="loot" id="stPanLoot"></div>
+    <div class="st-pan" data-pan="gen" id="stPanGen"></div>
     <div class="st-pan" data-pan="export" id="stPanExport"></div>
   </aside>
 </div>
@@ -1081,7 +1102,7 @@
     }
   }
   function moreSheet() {
-    const items = [["rename", "Rename structure"], ["resize", "Resize\u2026"], ["mx", "Mirror structure X"], ["mz", "Mirror structure Z"], ["rot", "Rotate 90\xB0"], ["replace", "Replace block\u2026"], ["trim", "Trim to content"], ["loot", "Loot"], ["export", "Export"], ["clear", "Clear everything"], ["create", "Create structure"]];
+    const items = [["rename", "Rename structure"], ["import", "Import structure"], ["resize", "Resize\u2026"], ["mx", "Mirror structure X"], ["mz", "Mirror structure Z"], ["rot", "Rotate 90\xB0"], ["replace", "Replace block\u2026"], ["trim", "Trim to content"], ["loot", "Loot"], ["gen", "Structure Generation"], ["export", "Export"], ["clear", "Clear everything"], ["create", "Create structure"]];
     popDialog(`<div class="st-dh"><b>${T("Structure")}</b></div><div class="st-more">${items.map((m) => `<button class="st-btn${m[0] === "create" ? " primary" : ""}${m[0] === "clear" ? " danger" : ""}" data-more="${m[0]}">${T(m[1])}</button>`).join("")}</div>`, () => true);
   }
   function moreClick(e) {
@@ -1098,7 +1119,8 @@
           renderExport();
         }
       } else if (m === "create") create();
-      else if (m === "loot" || m === "export") {
+      else if (m === "import") window.FD_STRUCT_IMPORT && FD_STRUCT_IMPORT.open();
+      else if (m === "loot" || m === "export" || m === "gen") {
         setTab(m);
         root.dataset.sheet = "1";
       } else $("#stMenuList").querySelector('[data-m="' + m + '"]').click();
@@ -1106,6 +1128,8 @@
   function setTab(t) {
     S.tab = t;
     $("#stSide").dataset.tab = t;
+    root.dataset.gen = t === "gen" ? "1" : "0";
+    if (t === "gen" && window.FD_STRUCT_GEN) FD_STRUCT_GEN.render();
     root.querySelectorAll("#stTabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
     if (t === "prev") drawIso();
   }
@@ -1248,6 +1272,7 @@
   }
   function changed(imm) {
     reqDraw();
+    if (window.FD_STRUCT_GEN) FD_STRUCT_GEN.dirty();
     if (window.FD_S3) FD_S3.redraw();
     if (window.FD_PAGE_MODE) saveDraftSoon();
     clearTimeout(statQ);
@@ -1319,7 +1344,7 @@
       if (!s) continue;
       const e = tex ? tx(baseOf(s)) : null;
       g.globalAlpha = a;
-      const ic = tex && MC && e && e.done && MC.shapeOf(e.id) !== "cube" && /^(chest|cross)$/.test(MC.shapeOf(e.id)) ? MC.icon(baseOf(s), s) : null;
+      const ic = tex && MC && e && e.done && /^(chest|cross|door|trapdoor|torch|lantern|fence|gate|wall|pane|ladder|button|plate)$/.test(MC.shapeOf(e.id)) ? MC.icon(baseOf(s), s) : null;
       if (ic && ic.canvas) g.drawImage(ic.canvas, px, py, ceil(z), ceil(z));
       else if (e && (e.tile || e.img)) {
         const t = e.tile || e.img;
@@ -2089,9 +2114,11 @@
     <p class="st-muted">${T("Preview shows a simplified view for very big structures.")}</p></div>`;
   }
   const slugName = () => U.slug(S.name);
-  function prepareExport() {
-    if (!S.walls || !S.pal.some((s) => D.isWall(s))) return { grid: S.grid, pal: S.pal };
-    const pal = S.pal.slice(), pm = new Map(pal.map((s, i) => [s, i])), g = S.grid.slice();
+  function prepareExport(g0, p0, dims) {
+    const SG = g0 || S.grid, SP = p0 || S.pal, SX = dims ? dims[0] : S.sx, SY = dims ? dims[1] : S.sy, SZ = dims ? dims[2] : S.sz;
+    const gi = (x, y, z) => (x * SY + y) * SZ + z, inb = (x, y, z) => x >= 0 && y >= 0 && z >= 0 && x < SX && y < SY && z < SZ;
+    if (!S.walls || !SP.some((s) => D.isWall(s))) return { grid: SG, pal: SP };
+    const pal = SP.slice(), pm = new Map(pal.map((s, i) => [s, i])), g = SG.slice();
     const pi = (s) => {
       let i = pm.get(s);
       if (i === void 0) {
@@ -2104,18 +2131,18 @@
     const SOLID_NO = /(stairs|slab|door|trapdoor|fence|pane|bars|torch|lantern|ladder|button|plate|carpet|rail|sapling|flower|grass|fern|vine|lever|banner|head|skull|candle|bed$|chain|water|lava|leaves|web|petals|rod|campfire|cauldron|hopper|anvil|chest|bell|lectern|scaffolding|pot|frame|bush|coral|kelp|seagrass|mushroom|roots|tulip|orchid|allium|bluet|daisy|cornflower|lily|poppy|dandelion|rose|peony|lilac|sunflower|cake|air)/;
     const conn = (s) => !!s && (D.isWall(s) || !SOLID_NO.test(shortName(s)));
     const wallSet =  new Set();
-    S.pal.forEach((s, i) => {
+    SP.forEach((s, i) => {
       if (D.isWall(s)) wallSet.add(i);
     });
     const dirs = [["east", 1, 0], ["west", -1, 0], ["south", 0, 1], ["north", 0, -1]];
-    for (let x = 0; x < S.sx; x++) for (let y = 0; y < S.sy; y++) for (let z = 0; z < S.sz; z++) {
-      const v = S.grid[gi(x, y, z)];
+    for (let x = 0; x < SX; x++) for (let y = 0; y < SY; y++) for (let z = 0; z < SZ; z++) {
+      const v = SG[gi(x, y, z)];
       if (!v || !wallSet.has(v)) continue;
       const st = {};
       let e = false, w = false, s = false, n = false;
       dirs.forEach(([nm, dx, dz]) => {
         const X = x + dx, Z = z + dz;
-        const nb = inb(X, y, Z) ? S.pal[S.grid[gi(X, y, Z)]] : null;
+        const nb = inb(X, y, Z) ? SP[SG[gi(X, y, Z)]] : null;
         const on = conn(nb);
         st["wall_connection_type_" + nm] = on ? "short" : "none";
         if (nm === "east") e = on;
@@ -2123,9 +2150,9 @@
         else if (nm === "south") s = on;
         else n = on;
       });
-      const up = inb(x, y + 1, z) && S.grid[gi(x, y + 1, z)] !== 0;
+      const up = inb(x, y + 1, z) && SG[gi(x, y + 1, z)] !== 0;
       st.wall_post_bit = !(e && w && !s && !n || s && n && !e && !w) || up;
-      const b = baseOf(S.pal[v]);
+      const b = baseOf(SP[v]);
       g[gi(x, y, z)] = pi(fmt(b, st));
     }
     return { grid: g, pal };
@@ -2193,10 +2220,19 @@
       report.push((f.created ? "+ " : "~ ") + bp.folder.name + "/functions/fd_structures/" + name + ".mcfunction");
     }
     if (S.script) wireScript(bp, report, name, pcs);
+    let genRes = null;
+    if (S.gen && S.gen.on && window.FD_STRUCT_GEN) {
+      try {
+        genRes = FD_STRUCT_GEN.onCreate({ name, bp, report, folder, folderPath, lootRel, b64, buildPiece });
+      } catch (err) {
+        console.error(err);
+        toast("Generation: " + err.message);
+      }
+    }
     render();
     saveState();
     toast(T("Structure saved: {0}").replace("{0}", name));
-    done(name, report, multi);
+    done(name, report, multi, genRes);
   }
   function wireScript(bp, report, name, pcs) {
     const m = bp.json;
@@ -2270,7 +2306,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
 }, { namespaces: ["fd"] });
 `;
   }
-  function done(name, report, multi) {
+  function done(name, report, multi, genRes) {
     clearDraft();
     const cmd = (t) => `<div class="st-cmd"><code>${esc(t)}</code><button class="st-btn sm" data-copy="${esc(t)}">${T("Copy")}</button></div>`;
     const tick = "/tickingarea add ~ ~ ~ ~" + Math.min(S.sx, 400) + " ~" + Math.min(S.sy, 320) + " ~" + Math.min(S.sz, 400);
@@ -2278,6 +2314,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
     $("#stPop").innerHTML = `<div class="st-dlg"><div class="st-dh"><b>${T("Done \u2714")}</b></div><div class="st-done"><h4>${T("Files")}</h4><ul class="st-files">${report.map((r) => `<li class="${r[0] === "+" ? "new" : ""}">${esc(r)}</li>`).join("")}</ul>
       <h4>${T("Place it in the world")}</h4>${multi ? `<p class="st-muted">${T("Run the function to place every piece at once:")}</p>${cmd("/function fd_structures/" + name)}` : cmd("/structure load mystructure:" + name + " ~ ~ ~")}${S.script ? cmd("/scriptevent fd:structure " + name) : ""}
       ${multi ? `<p class="st-muted">${T("Big structures: load the area first (/tickingarea add ~ ~ ~ ~{0} ~{1} ~{2}) or the pieces far away will not place.").replace("{0}", Math.min(S.sx, 400)).replace("{1}", Math.min(S.sy, 320)).replace("{2}", Math.min(S.sz, 400))}</p>${cmd(tick)}` : ""}
+      ${genRes ? genRes.html : ""}
       <p class="st-muted">${T("Make sure the BP is active in the world. Structures live in the BP at structures/<name>.mcstructure and are loaded as mystructure:<name>.")}</p></div>
       <div class="st-dact"><button class="st-btn" id="stMore">${T("Add more")}</button><button class="st-btn primary" id="stFin">${T("Close")}</button></div></div>`;
     $("#stPop").onclick = (e) => {
@@ -2397,6 +2434,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
     $("#stGo").onclick = create;
     $("#stSize").onclick = resizeDialog;
     $("#stView3").onclick = toggleView;
+    $("#stImport").onclick = () => window.FD_STRUCT_IMPORT && FD_STRUCT_IMPORT.open();
     $("#stPop").addEventListener("click", moreClick);
     $("#stDots").onclick = moreSheet;
     $("#stSheetBtn").onclick = () => {
@@ -2699,15 +2737,67 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
     document.addEventListener("keydown", keyH, true);
     document.addEventListener("keyup", keyH, true);
   }
+  // ---------- importación (la usa struct-import.js) ----------
+  function applyImported(o) {
+    S.name = o.name || S.name;
+    S.sx = o.sx;
+    S.sy = o.sy;
+    S.sz = o.sz;
+    S.pal = o.pal;
+    S.pmap = new Map(o.pal.map((p, i) => [p, i]));
+    S.grid = o.grid;
+    S.chests = o.chests;
+    S.selChest = null;
+    S.sel = null;
+    S.undo = [];
+    S.redo = [];
+    S.layer = 0;
+    S.cut = false;
+    const cnt = new Map();
+    for (let i = 0; i < S.grid.length; i++) if (S.grid[i]) cnt.set(S.grid[i], (cnt.get(S.grid[i]) || 0) + 1);
+    const top = Array.from(cnt.entries()).sort((a, b) => b[1] - a[1]).slice(0, 9).map((e) => S.pal[e[0]]);
+    if (top.length) {
+      while (top.length < 9) top.push(S.hot[top.length] || defaultId("stone"));
+      S.hot = top;
+      S.hi = 0;
+      S.cur = S.hot[0];
+    }
+    const nm = $("#stName");
+    if (nm) nm.value = S.name;
+    syncSize();
+    fitView();
+    renderHot();
+    renderProps();
+    renderLoot();
+    renderExport();
+    changed(true);
+    if (window.FD_STRUCT_GEN) FD_STRUCT_GEN.dirty(true);
+  }
+  function importAsClip(o) {
+    const pm = o.pal.map((s) => s === "minecraft:air" ? 0 : palIdx(s));
+    const cells = new Uint16Array(o.grid.length);
+    for (let i = 0; i < cells.length; i++) cells[i] = pm[o.grid[i]] || 0;
+    const ch = new Map();
+    o.chests.forEach((c, k) => {
+      ch.set(k, c);
+    });
+    S.clip = { w: o.sx, h: o.sy, d: o.sz, cells, chests: ch };
+    S.tool = "paste";
+    S.pasteAir = false;
+    updateTools();
+    renderBlocks();
+    reqDraw();
+  }
   const API = { get S() {
     return S;
   }, get root() {
     return root;
-  }, place, setB, beginOp, endOp, afterEdit, changed, tx, rgbOf, rgbSide, baseOf, gi, inb, palIdx, setCur, bbox, toast, doUndo, doRedo };
+  }, place, setB, beginOp, endOp, afterEdit, changed, tx, rgbOf, rgbSide, baseOf, gi, inb, palIdx, setCur, bbox, toast, doUndo, doRedo,
+    applyImported, importAsClip, popDialog, countBlocks, prepareExport, xfState, splitId, fmt, shortName, full, create, esc, T, ico, projectFiles: projectBinFiles, D, U };
   window.FD_STRUCT_API = API;
   window.FD_STRUCT = { buildPiece, NB, D: () => D, get state() {
     return S;
-  }, _test: { palIdx: (s) => palIdx(s), xfState } };
+  }, _test: { palIdx: (s) => palIdx(s), xfState, setState: (s) => { S = s; } } };
   TOOLBOX_TOOLS.push({
     id: "structures",
     name: "Structures",

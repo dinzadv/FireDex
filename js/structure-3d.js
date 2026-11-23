@@ -2,7 +2,7 @@
   const hooks = (window.FD_STRUCT_HOOKS = window.FD_STRUCT_HOOKS || []);
   const T = (s) => (window.FD_I18N ? FD_I18N.t(s) : s);
   const CAP = 120000;
-  const TRANS = /glass|leaves|ice$|water|lava|barrier|bars|flower|torch|grass$|fern|vine|sapling|rose|tulip|dandelion|web|rail|ladder|sign|door|fence|pane|portal|candle|button|lever|banner|carpet|slab|stairs|bed$|chest|barrel|skull|head|pot$|lantern|chain|bell|anvil|cauldron|hopper|snow_layer|mushroom|roots|fungus|reeds|bush|orchid|allium|azure|cornflower|daisy|dead|sugar_cane/;
+  const TRANS = /glass|leaves|ice$|water|lava|barrier|bars|flower|torch|grass$|fern|vine|sapling|rose|tulip|dandelion|web|rail|ladder|sign|door|fence|pane|portal|candle|button|lever|banner|carpet|slab|stairs|bed$|chest|barrel|skull|head|pot$|lantern|chain|bell|wall|plate|gate|rod|lever|anvil|cauldron|hopper|snow_layer|mushroom|roots|fungus|reeds|bush|orchid|allium|azure|cornflower|daisy|dead|sugar_cane/;
     const FACES = [
     { n: [0, 1, 0], o: [0, 1, 0], u: [1, 0, 0], v: [0, 0, 1], sh: 1 },
     { n: [0, -1, 0], o: [0, 0, 0], u: [1, 0, 0], v: [0, 0, 1], sh: 0.5 },
@@ -118,7 +118,7 @@
     const x0 = b ? b.x0 : 0, x1 = b ? b.x1 : S.sx - 1, z0 = b ? b.z0 : 0, z1 = b ? b.z1 : S.sz - 1;
     if (b) y0 = Math.max(y0, b.y0);
     const gridA = S.grid, sy = S.sy, sz = S.sz;
-    const opq = new Uint8Array(S.pal.length), col = [], colS = [], info = [], mods = [];
+    const opq = new Uint8Array(S.pal.length), col = [], colS = [], info = [], mods = [], ctxN = [];
     S.pal.forEach((str, i) => {
       if (!i) return;
       const base = A.baseOf(str);
@@ -128,6 +128,7 @@
       col[i] = A.rgbOf(base);
       colS[i] = A.rgbSide ? A.rgbSide(base) : col[i];
       mods[i] = window.FD_MC ? FD_MC.model(base, str) : null;
+      ctxN[i] = window.FD_MC && FD_MC.needsCtx ? FD_MC.needsCtx(base) : false;
     });
     const gx = M.sy * M.cp, gy = -M.sp, gz = M.cy * M.cp;
     const xs = [], ys = [], zs = [];
@@ -153,7 +154,14 @@
           proj(x + 0.5, y + 0.5, z + 0.5, tmp, 0);
           if (tmp[0] < -margin || tmp[0] > W + margin || tmp[1] < -margin || tmp[1] > H + margin) continue;
           const en = info[id];
-          const mod = !flat ? mods[id] : null;
+          let mod = !flat ? mods[id] : null;
+          if (!flat && ctxN[id]) {
+            const nbf = (dx, dy, dz) => {
+              const c2 = cell(x + dx, y + dy, z + dz);
+              return c2 ? S.pal[c2] : "";
+            };
+            mod = FD_MC.model(A.baseOf(S.pal[id]), S.pal[id], nbf);
+          }
           const c = col[id] || [128, 128, 128], cs = colS[id] || c;
           if (mod) {
             const ob = [x, y, z];

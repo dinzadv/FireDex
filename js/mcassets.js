@@ -254,9 +254,23 @@
     if (/_stairs$/.test(id)) return "stairs";
     if (/(^|_)carpet$/.test(id)) return "carpet";
     if (id === "snow_layer") return "snow";
+    if (/(^|_)door$/.test(id)) return "door";
+    if (/(^|_)trapdoor$/.test(id)) return "trapdoor";
+    if (/(^|_)fence_gate$/.test(id)) return "gate";
+    if (/(^|_)fence$/.test(id)) return "fence";
+    if (/_wall$/.test(id)) return "wall";
+    if (/(^|_)(glass_pane|stained_glass_pane)$|(^|_)bars$/.test(id)) return "pane";
+    if (/(^|_)torch$|^colored_torch_/.test(id)) return "torch";
+    if (/lantern$/.test(id) && id !== "sea_lantern") return "lantern";
+    if (/_button$/.test(id)) return "button";
+    if (/_pressure_plate$/.test(id)) return "plate";
+    if (id === "ladder") return "ladder";
     if (CROSS.test(id)) return "cross";
     return "cube";
   }
+  // formas cuyo modelo depende de los bloques vecinos (vallas, muros, paneles, puertas)
+  const CTX = { door: 1, fence: 1, wall: 1, pane: 1 };
+  const needsCtx = (base) => !!CTX[shapeOf(short(base))];
   function stateOf(str) {
     const o = {}, m = /\[(.*)\]\s*$/.exec(String(str || ""));
     if (!m) return o;
@@ -366,14 +380,101 @@
     return e;
   }
 
+  // ---------- texturas especiales (puertas) ----------
+  const SPT = new Map();
+  function doorKeys(id) {
+    const w = id.replace(/^waxed_/, "").replace(/_door$/, "").replace(/^wooden$/, "wood");
+    const A = [], B = [];
+    if (id === "wooden_door" || id === "oak_door") {
+      A.push("door_wood_upper", "oak_door_top");
+      B.push("door_wood_lower", "oak_door_bottom");
+    } else if (id === "iron_door") {
+      A.push("door_iron_upper", "iron_door_top");
+      B.push("door_iron_lower", "iron_door_bottom");
+    } else {
+      A.push("door_" + w + "_upper", w + "_door_top", w + "_door_upper");
+      B.push("door_" + w + "_lower", w + "_door_bottom", w + "_door_lower");
+    }
+    return { up: A, lo: B };
+  }
+  function firstTex(keys) {
+    return keys.reduce((acc, k) => acc.then((r) => {
+      if (r) return r;
+      const path = M.terrain && M.terrain[k];
+      return loadImg(path || "textures/blocks/" + k, !path);
+    }), Promise.resolve(null));
+  }
+  function special(id, shape) {
+    const key = shape + "|" + id;
+    let r = SPT.get(key);
+    if (r) return r;
+    r = { done: false, upper: null, lower: null };
+    SPT.set(key, r);
+    if (shape === "door") {
+      const k = doorKeys(id);
+      r.p = ready.then(() => Promise.all([firstTex(k.up), firstTex(k.lo)])).then(([u, l]) => {
+        r.upper = u && tileOf(u);
+        r.lower = l && tileOf(l);
+        r.done = true;
+        fire();
+      }).catch(() => {
+        r.done = true;
+        fire();
+      });
+    } else r.done = true;
+    return r;
+  }
+
+  // Añade al estado pseudo-claves (__x) con lo que se sabe de los vecinos
+  function ctxState(shape, st, nb) {
+    const S = stateOf(st), ex = [];
+    const isConn = (str) => {
+      if (!str) return false;
+      const sh = shapeOf(short(str));
+      return sh === "cube" || sh === "pane" || sh === "wall";
+    };
+    if (shape === "door") {
+      const upper = S.upper_block_bit === "true" || S.upper_block_bit === "1";
+      const o = stateOf(nb(0, upper ? -1 : 1, 0) || ""), lo = upper ? o : S, up = upper ? S : o;
+      ex.push("__half=" + (upper ? "upper" : "lower"));
+      ex.push("__dir=" + (parseInt(lo.direction !== undefined ? lo.direction : S.direction, 10) || 0));
+      ex.push("__open=" + String((lo.open_bit !== undefined ? lo.open_bit : S.open_bit) === "true" || (lo.open_bit !== undefined ? lo.open_bit : S.open_bit) === "1"));
+      const hg = up.door_hinge_bit !== undefined ? up.door_hinge_bit : S.door_hinge_bit;
+      ex.push("__hinge=" + String(hg === "true" || hg === "1"));
+    } else {
+      const same = (str) => {
+        if (!str) return false;
+        const sh = shapeOf(short(str));
+        return sh === shape || sh === "gate" && shape === "fence";
+      };
+      [["e", 1, 0], ["w", -1, 0], ["s", 0, 1], ["n", 0, -1]].forEach(([k, dx, dz]) => {
+        const n = nb(dx, 0, dz), key = "wall_connection_type_" + { e: "east", w: "west", s: "south", n: "north" }[k];
+        let on;
+        if (shape === "wall" && S[key] !== undefined) on = S[key] !== "none";
+        else on = shape === "fence" ? same(n) || isConn(n) && !/leaves|glass/.test(short(n || "")) : isConn(n);
+        ex.push("__" + k + "=" + (on ? 1 : 0));
+      });
+    }
+    const m = /^(.*?)(?:\[(.*)\])?\s*$/.exec(String(st || ""));
+    const inner = m && m[2] ? m[2] + "," : "";
+    return (m ? m[1] : "") + "[" + inner + ex.join(",") + "]";
+  }
+
   // Devuelve { faces:[…], quads:[…] } o null si es un cubo normal o aún no hay textura.
+  // nb(dx,dy,dz) → cadena de estado del vecino ("" = aire, null = fuera). Solo hace falta para CTX.
   const MC = new Map();
   const chestPath = (id) => "textures/entity/chest/" + (id === "trapped_chest" ? "trapped" : id === "ender_chest" ? "ender" : "normal");
-  function model(base, st) {
+  function model(base, st, nb) {
     const e = entry(base), id = e.id, shape = shapeOf(id);
     if (shape === "cube" || e.custom) return null;
-    const tok = shape === "chest" ? entImg(chestPath(id)).img : e.faces;
+    let tok;
+    if (shape === "chest") tok = entImg(chestPath(id)).img;
+    else if (shape === "door") {
+      const sp = special(id, shape);
+      tok = sp.done && e.done ? sp : null;
+    } else tok = e.faces;
     if (!tok) return null;
+    if (nb && CTX[shape]) st = ctxState(shape, st, nb);
     const key = id + "|" + (st || "");
     const c = MC.get(key);
     if (c && c.tok === tok) return c.m;
@@ -399,6 +500,115 @@
       if (!t) return null;
       const s = t.width || t.naturalWidth, r = [0, 0, s, s];
       return { faces: [], quads: [{ o: [0, 1, 0], u: [1, 0, 1], v: [0, -1, 0], img: t, rect: r }, { o: [1, 1, 0], u: [-1, 0, 1], v: [0, -1, 0], img: t, rect: r }] };
+    }
+    const bx = (a, b) => ({ from: a.map((v) => v / 16), to: b.map((v) => v / 16) });
+    const rbx = (b, k) => {
+      const r = rotBox([b.from, b.to], k);
+      return { from: r[0], to: r[1] };
+    };
+    const faceSet = (t) => ({ up: { tile: t }, down: { tile: t }, north: { tile: t }, south: { tile: t }, east: { tile: t }, west: { tile: t } });
+    const build = (boxes, tiles) => {
+      let f = [];
+      boxes.forEach((b) => {
+        f = f.concat(blockFaces(b, tiles || e.faces));
+      });
+      return { faces: f, quads: null };
+    };
+    const tru = (v) => v === "true" || v === "1" || v === true;
+    const dirName = (v, list) => (/^\d+$/.test(String(v)) ? list[parseInt(v, 10)] : v);
+    if (shape === "door") {
+      const sp = special(id, shape), half = S.__half || (tru(S.upper_block_bit) ? "upper" : "lower");
+      const dir = S.__dir !== undefined ? parseInt(S.__dir, 10) : parseInt(S.direction, 10) || 0;
+      const open = S.__open !== undefined ? tru(S.__open) : tru(S.open_bit), hinge = S.__hinge !== undefined ? tru(S.__hinge) : tru(S.door_hinge_bit);
+      const edge = (open ? (hinge ? ["S", "W", "N", "E"] : ["N", "E", "S", "W"]) : ["W", "N", "E", "S"])[dir & 3];
+      const B = { W: bx([0, 0, 0], [3, 16, 16]), N: bx([0, 0, 0], [16, 16, 3]), E: bx([13, 0, 0], [16, 16, 16]), S: bx([0, 0, 13], [16, 16, 16]) };
+      const t = half === "upper" ? sp.upper || sp.lower : sp.lower || sp.upper;
+      return build([B[edge]], t ? faceSet(t) : e.faces);
+    }
+    if (shape === "trapdoor") {
+      const d = dirName(S.direction, ["east", "west", "south", "north"]) || "east", top = tru(S.upside_down_bit), open = tru(S.open_bit);
+      const B = open ? { east: bx([13, 0, 0], [16, 16, 16]), west: bx([0, 0, 0], [3, 16, 16]), south: bx([0, 0, 13], [16, 16, 16]), north: bx([0, 0, 0], [16, 16, 3]) }[d] : top ? bx([0, 13, 0], [16, 16, 16]) : bx([0, 0, 0], [16, 3, 16]);
+      return build([B || bx([0, 0, 0], [16, 3, 16])]);
+    }
+    if (shape === "gate") {
+      const d = dirName(S.direction, ["south", "west", "north", "east"]) || "south", alongX = d === "south" || d === "north", open = tru(S.open_bit), wall = tru(S.in_wall_bit), dy = wall ? -3 : 0;
+      const b = [bx([0, 5 + dy, 6], [2, 16 + dy, 10]), bx([14, 5 + dy, 6], [16, 16 + dy, 10])];
+      if (open) b.push(bx([0, 6 + dy, 10], [2, 9 + dy, 16 - 8]), bx([0, 12 + dy, 10], [2, 15 + dy, 16 - 8]), bx([14, 6 + dy, 10], [16, 9 + dy, 16 - 8]), bx([14, 12 + dy, 10], [16, 15 + dy, 16 - 8]));
+      else b.push(bx([2, 6 + dy, 7], [14, 9 + dy, 9]), bx([2, 12 + dy, 7], [14, 15 + dy, 9]), bx([6, 9 + dy, 7], [10, 12 + dy, 9]));
+      return build(alongX ? b : b.map((q) => rbx(q, 1)));
+    }
+    if (shape === "fence") {
+      const b = [bx([6, 0, 6], [10, 16, 6 + 4])];
+      const arm = { e: [[10, 6, 7], [16, 9, 9], [10, 12, 7], [16, 15, 9]], w: [[0, 6, 7], [6, 9, 9], [0, 12, 7], [6, 15, 9]], s: [[7, 6, 10], [9, 9, 16], [7, 12, 10], [9, 15, 16]], n: [[7, 6, 0], [9, 9, 6], [7, 12, 0], [9, 15, 6]] };
+      Object.keys(arm).forEach((k) => {
+        if (S["__" + k] === "1") {
+          b.push(bx(arm[k][0], arm[k][1]), bx(arm[k][2], arm[k][3]));
+        }
+      });
+      return build(b);
+    }
+    if (shape === "wall") {
+      const on = { e: S.__e === "1", w: S.__w === "1", s: S.__s === "1", n: S.__n === "1" };
+      const cnt = (on.e ? 1 : 0) + (on.w ? 1 : 0) + (on.s ? 1 : 0) + (on.n ? 1 : 0);
+      const straight = cnt === 2 && (on.e && on.w || on.s && on.n);
+      const post = S.wall_post_bit !== undefined ? tru(S.wall_post_bit) : !straight;
+      const b = [];
+      if (post) b.push(bx([4, 0, 4], [12, 16, 12]));
+      const arm = { e: [[8, 0, 5], [16, 14, 11]], w: [[0, 0, 5], [8, 14, 11]], s: [[5, 0, 8], [11, 14, 16]], n: [[5, 0, 0], [11, 14, 8]] };
+      Object.keys(arm).forEach((k) => {
+        if (on[k]) b.push(bx(arm[k][0], arm[k][1]));
+      });
+      if (!b.length) b.push(bx([4, 0, 4], [12, 16, 12]));
+      return build(b);
+    }
+    if (shape === "pane") {
+      const on = { e: S.__e === "1", w: S.__w === "1", s: S.__s === "1", n: S.__n === "1" };
+      const b = [bx([7, 0, 7], [9, 16, 9])];
+      const arm = { e: [[9, 0, 7], [16, 16, 9]], w: [[0, 0, 7], [7, 16, 9]], s: [[7, 0, 9], [9, 16, 16]], n: [[7, 0, 0], [9, 16, 7]] };
+      Object.keys(arm).forEach((k) => {
+        if (on[k]) b.push(bx(arm[k][0], arm[k][1]));
+      });
+      return build(b);
+    }
+    if (shape === "plate") {
+      const down = parseInt(S.redstone_signal, 10) > 0;
+      return build([bx([1, 0, 1], [15, down ? 0.5 : 1, 15])]);
+    }
+    if (shape === "button") {
+      const f = dirName(S.facing_direction, ["down", "up", "north", "south", "west", "east"]) || "up";
+      const B = { up: bx([5, 0, 6], [11, 2, 10]), down: bx([5, 14, 6], [11, 16, 10]), north: bx([5, 6, 14], [11, 10, 16]), south: bx([5, 6, 0], [11, 10, 2]), west: bx([14, 6, 5], [16, 10, 11]), east: bx([0, 6, 5], [2, 10, 11]) };
+      return build([B[f] || B.up]);
+    }
+    if (shape === "ladder") {
+      const f = dirName(S.facing_direction, ["down", "up", "north", "south", "west", "east"]) || "north";
+      const B = { north: bx([0, 0, 15], [16, 16, 16]), south: bx([0, 0, 0], [16, 16, 1]), west: bx([15, 0, 0], [16, 16, 16]), east: bx([0, 0, 0], [1, 16, 16]) };
+      return build([B[f] || B.north]);
+    }
+    if (shape === "lantern") {
+      const h = tru(S.hanging) ? 1 : 0;
+      return build([bx([5, h, 5], [11, 7 + h, 11]), bx([6, 7 + h, 6], [10, 9 + h, 10])]);
+    }
+    if (shape === "torch") {
+      const t = e.faces.north.tile || e.faces.up.tile;
+      if (!t) return null;
+      const dir = dirName(S.torch_facing_direction, ["unknown", "west", "east", "north", "south", "top"]) || "top";
+      if (dir === "top" || dir === "unknown" || !(dir in DIRK)) return build([bx([7, 0, 7], [9, 10, 9])], faceSet(t));
+      // antorcha de pared: caja inclinada alejándose del muro (se construye hacia +x y se rota)
+      const k = DIRK[dir], sh = 0.4, W = 2 / 16, y0 = 3.5 / 16, y1 = 13.5 / 16, x0 = 2.5 / 16, z0 = 7 / 16;
+      const pt = (x, y, z) => [x + sh * (y - y0), y, z];
+      const quad = (n, o, u, v, rect, shade) => {
+        const O = pt(o[0], o[1], o[2]), U = [u[0] + sh * u[1], u[1], u[2]], V = [v[0] + sh * v[1], v[1], v[2]];
+        return { n: rotV(n, k), o: rotP(O, k), u: rotV(U, k), v: rotV(V, k), img: t, rect, shade };
+      };
+      const s16 = t.width || t.naturalWidth, r1 = [7 * s16 / 16, 6 * s16 / 16, 2 * s16 / 16, 10 * s16 / 16];
+      const hgt = y1 - y0, faces = [
+        quad([0, 0, -1], [x0 + W, y1, z0], [-W, 0, 0], [0, -hgt, 0], r1, 0.64),
+        quad([0, 0, 1], [x0, y1, z0 + W], [W, 0, 0], [0, -hgt, 0], r1, 0.64),
+        quad([1, 0, 0], [x0 + W, y1, z0 + W], [0, 0, -W], [0, -hgt, 0], r1, 0.78),
+        quad([-1, 0, 0], [x0, y1, z0], [0, 0, W], [0, -hgt, 0], r1, 0.78),
+        quad([0, 1, 0], [x0, y1, z0], [W, 0, 0], [0, 0, W], [7 * s16 / 16, 6 * s16 / 16, 2 * s16 / 16, 2 * s16 / 16], 1)
+      ];
+      return { faces, quads: null };
     }
     let boxes;
     if (shape === "slab") {
@@ -432,10 +642,12 @@
     r.p = e.p.then(async () => {
       if (e.custom) return r;
       if (shape === "chest") await entImg(chestPath(id)).p;
+      if (shape === "door") await special(id, "door").p;
       if (!e.faces && shape !== "chest") return r;
       const S = 64, c = mkCanvas(S, S), g = c.getContext("2d");
       g.imageSmoothingEnabled = false;
-      const m = shape === "cube" ? null : model(base, shape === "chest" ? "[minecraft:cardinal_direction=south]" : shape === "stairs" ? "[weirdo_direction=0]" : "");
+      const line = (dx, dy, dz) => (dz === 0 && dx !== 0 && dy === 0 ? "minecraft:stone" : "");
+      const m = shape === "cube" ? null : model(base, shape === "chest" ? "[minecraft:cardinal_direction=south]" : shape === "stairs" ? "[weirdo_direction=0]" : "", CTX[shape] && shape !== "door" ? line : null);
       if (shape === "cross" && m && m.quads) {
         const t = m.quads[0].img;
         g.drawImage(t, 0, 0, t.width || t.naturalWidth, t.height || t.naturalHeight, 6, 6, S - 12, S - 12);
@@ -508,6 +720,7 @@
     item,
     tileOf,
     shapeOf,
+    needsCtx,
     coverage,
     onUpdate: (f) => hooks.push(f),
     get origin() {
